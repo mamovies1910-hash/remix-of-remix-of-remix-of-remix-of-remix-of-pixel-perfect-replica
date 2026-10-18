@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1792316898676,
+      "when": 1792320225334,
       "tag": "0000_signup_trigger",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1792317219632,
-      "tag": "0001_block_and_task_cooldown_rules",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1792317508537,
-      "tag": "0002_gift_card_redeem",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1792317740083,
-      "tag": "0003_gift_options_public_read",
       "breakpoints": true
     }
   ]
