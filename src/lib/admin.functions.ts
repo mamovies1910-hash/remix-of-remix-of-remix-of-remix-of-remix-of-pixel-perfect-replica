@@ -166,6 +166,17 @@ export const adminVideoUploadUrl = createServerFn({ method: "POST" })
     const path = `videos/${crypto.randomUUID()}.${ext}`;
     const { data: s, error } = await db.storage.from("media").createSignedUploadUrl(path);
     if (error || !s) throw new Error(error?.message ?? "Could not start upload");
-    const { data: pub } = db.storage.from("media").getPublicUrl(path);
-    return { path, token: s.token, publicUrl: pub.publicUrl };
+    return { path, token: s.token };
+  });
+
+// After upload, create a long-lived viewing link and save it as a dashboard video.
+export const adminFinishVideo = createServerFn({ method: "POST" })
+  .inputValidator((d) => keyed({ path: z.string().regex(/^videos\/[a-f0-9-]+\.[a-z0-9]+$/i), title: z.string().max(120).nullable(), sort_order: z.number().int().min(0).max(1000) }).parse(d))
+  .handler(async ({ data }) => {
+    const db = await admin(data.key);
+    const { data: s, error } = await db.storage.from("media").createSignedUrl(data.path, 60 * 60 * 24 * 365 * 10);
+    if (error || !s) throw new Error(error?.message ?? "Could not save video");
+    const ins = await db.from("media_items").insert({ kind: "video", url: s.signedUrl, title: data.title, sort_order: data.sort_order });
+    if (ins.error) throw new Error(ins.error.message);
+    return { ok: true };
   });
