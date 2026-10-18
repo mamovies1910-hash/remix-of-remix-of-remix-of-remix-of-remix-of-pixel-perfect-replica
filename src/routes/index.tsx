@@ -32,8 +32,12 @@ function Welcome() {
   const videos = adminVideos?.length ? adminVideos : [promo1, promo2];
   const [signedIn, setSignedIn] = useState(false);
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-  }, []);
+    // Already logged in on this device: open the app directly.
+    supabase.auth.getSession().then(({ data }) => {
+      setSignedIn(!!data.session);
+      if (data.session) nav({ to: "/home", replace: true });
+    });
+  }, [nav]);
 
 
   return (
