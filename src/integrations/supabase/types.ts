@@ -86,6 +86,89 @@ export type Database = {
         }
         Relationships: []
       }
+      invest_plans: {
+        Row: {
+          created_at: string
+          daily_percent: number
+          description: string | null
+          duration_days: number
+          emoji: string
+          id: string
+          is_active: boolean
+          max_amount: number
+          min_amount: number
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          daily_percent?: number
+          description?: string | null
+          duration_days?: number
+          emoji?: string
+          id?: string
+          is_active?: boolean
+          max_amount?: number
+          min_amount?: number
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          daily_percent?: number
+          description?: string | null
+          duration_days?: number
+          emoji?: string
+          id?: string
+          is_active?: boolean
+          max_amount?: number
+          min_amount?: number
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      investments: {
+        Row: {
+          amount: number
+          daily_percent: number
+          duration_days: number
+          id: string
+          plan_id: string
+          plan_name: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          daily_percent: number
+          duration_days: number
+          id?: string
+          plan_id: string
+          plan_name: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          daily_percent?: number
+          duration_days?: number
+          id?: string
+          plan_id?: string
+          plan_name?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "invest_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media_items: {
         Row: {
           created_at: string
@@ -416,6 +499,11 @@ export type Database = {
         }[]
       }
       has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
+      invest_delta: { Args: { _uid: string }; Returns: number }
+      invest_now: {
+        Args: { _amount: number; _plan_id: string }
+        Returns: undefined
+      }
       request_redeem: { Args: { _option_id: string }; Returns: undefined }
       request_withdrawal: {
         Args: { _amount: number; _payout_method_id: string }

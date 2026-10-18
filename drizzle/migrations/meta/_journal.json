@@ -8,6 +8,13 @@
       "when": 1792321865006,
       "tag": "0000_signup_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792322666238,
+      "tag": "0001_invest_feature",
+      "breakpoints": true
     }
   ]
 }
