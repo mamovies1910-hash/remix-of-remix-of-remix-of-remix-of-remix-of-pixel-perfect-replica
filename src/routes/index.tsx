@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, PlayCircle, Mail, ShieldCheck, Smartphone, Wallet } from "lucide-react";
+import { ArrowRight, CheckCircle2, PlayCircle, Mail, ShieldCheck, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import hero from "@/assets/hero.jpg";
 import promo1 from "@/assets/promo-1.mp4.asset.json";
