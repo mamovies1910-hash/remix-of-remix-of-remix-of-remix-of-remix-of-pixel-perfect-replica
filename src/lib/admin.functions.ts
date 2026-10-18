@@ -29,7 +29,7 @@ export const adminGetData = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const db = await admin(data.key);
     const [users, bal, wd, pm, tasks, media, settings] = await Promise.all([
-      db.from("profiles").select("id, full_name, email, phone, country, account_status, created_at, last_seen_at").order("created_at", { ascending: false }),
+      db.from("profiles").select("id, full_name, email, phone, avatar_url, country, account_status, created_at, last_seen_at").order("created_at", { ascending: false }),
       db.rpc("admin_user_balances"),
       db.from("withdrawals").select("*").order("created_at", { ascending: false }).limit(500),
       db.from("payout_methods").select("*"),
