@@ -120,7 +120,7 @@ function UsersTab({ d, k, reload }: TabProps) {
     const v = window.prompt("Amount to add (use minus to deduct), e.g. 50 or -20");
     if (!v) return;
     const amount = Number(v);
-    if (!Number.isFinite(amount) || amount === 0) return toast.error("Enter a valid amount");
+    if (!Number.isFinite(amount) || amount === 0) { toast.error("Enter a valid amount"); return; }
     const note = window.prompt("Reason (optional)") ?? undefined;
     try { await adminAdjustBalance({ data: { key: k, userId, amount, note } }); toast.success("Balance updated"); reload(); } catch (e) { err(e); }
   }
@@ -211,7 +211,7 @@ function MediaTab({ d, k, reload }: TabProps) {
 
   async function uploadSlide(f: File | undefined) {
     if (!f) return;
-    if (f.size > 10 * 1024 * 1024) return toast.error("Image must be under 10 MB");
+    if (f.size > 10 * 1024 * 1024) { toast.error("Image must be under 10 MB"); return; }
     setBusy(true);
     try {
       const { url } = await adminUploadImage({ data: { key: k, base64: await readBase64(f) } });
@@ -222,7 +222,7 @@ function MediaTab({ d, k, reload }: TabProps) {
   }
   async function uploadVideo(f: File | undefined) {
     if (!f) return;
-    if (f.size > 100 * 1024 * 1024) return toast.error("Video must be under 100 MB");
+    if (f.size > 100 * 1024 * 1024) { toast.error("Video must be under 100 MB"); return; }
     setBusy(true);
     try {
       const s = await adminVideoUploadUrl({ data: { key: k, filename: f.name } });
