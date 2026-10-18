@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Country flags render through the `Flag` component (`src/components/flag.tsx`, flag-icons SVGs), never emoji flags — many phones show emoji flags as plain letters like "IN".

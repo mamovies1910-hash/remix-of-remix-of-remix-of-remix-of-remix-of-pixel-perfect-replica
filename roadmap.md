@@ -1,0 +1,12 @@
+# Unto Together roadmap
+- [ ] Real Firebase Google/email accounts and persistent user details — pending secure Firebase server credentials and provider setup
+- [ ] ImgBB profile uploads — pending secure key storage
+- [ ] Persist and protect earnings/balances; admin visibility of name, phone and balances
+- [ ] Backend: profiles, roles, tasks, submissions, ledger, withdrawals, videos
+- [ ] Welcome + login (Google, email)
+- [ ] Profile setup
+- [ ] Dashboard, Tasks, Task detail/submit, Learn, Profile
+- [ ] Withdrawal page (simulated, no real UPI/bank — user will add bank API later)
+- [ ] Admin: users (active), task submissions, withdrawals status/payment, tasks & videos
+- [ ] EN / HI / TE language switch
+- [ ] Mobile OTP — blocked: needs SMS provider credentials
