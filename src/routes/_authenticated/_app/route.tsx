@@ -10,10 +10,9 @@ import { needsProfileSetup, profileOptions } from "@/lib/profile-query";
 
 export const Route = createFileRoute("/_authenticated/_app")({
   beforeLoad: async ({ context }) => {
-    // Demo mode: skip the profile-completed check, the demo profile is always complete.
+    // Setup is shown only right after creating an account; normal login always opens the app.
     if (context.userId === "demo-user") return { accountStatus: "active" };
     const profile = await context.queryClient.ensureQueryData(profileOptions(context.userId));
-    if (needsProfileSetup(profile)) throw redirect({ to: "/setup" });
     return { accountStatus: profile?.account_status ?? "active" };
   },
   component: AppShell,
