@@ -162,8 +162,7 @@ function PhoneVerify({ verified, onVerified, onChange }: { verified: boolean; on
   const [code, setCode] = useState("");
   const [otp, setOtp] = useState(["", "", "", ""]);
   const refs = useRef<(HTMLInputElement | null)[]>([]);
-  const c = COUNTRIES[ci] ?? COUNTRIES[0];
-  if (!c) return null;
+  const c = (COUNTRIES[ci] ?? COUNTRIES[0])!;
 
   function send() {
     const n = String(Math.floor(1000 + Math.random() * 9000));
