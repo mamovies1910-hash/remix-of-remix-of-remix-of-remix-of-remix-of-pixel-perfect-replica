@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export function profileOptions(userId: string) {
   return queryOptions({
     queryKey: ["profile", userId],
-    staleTime: 60_000,
+    staleTime: 5 * 60_000,
     queryFn: async () => {
       const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
       if (error) throw error;

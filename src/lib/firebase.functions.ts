@@ -40,7 +40,7 @@ export const exchangeFirebaseIdentity = createServerFn({ method: "POST" })
   // Existing profiles are updated, not upserted: omitted default values must
   // never reset profile_completed, the saved photo or details on repeat login.
   const [profile, link] = await Promise.all([
-    supabaseAdmin.from("profiles").update({ email: identity.email }).eq("id", userId).select("id").maybeSingle(),
+    supabaseAdmin.from("profiles").update({ email: identity.email }).eq("id", userId).select("id, profile_completed").maybeSingle(),
     supabaseAdmin.auth.admin.generateLink({ type: "magiclink", email: internalEmail }),
   ]);
   if (profile.error) throw new Error("Unable to save your account.");
@@ -48,6 +48,8 @@ export const exchangeFirebaseIdentity = createServerFn({ method: "POST" })
     const createdProfile = await supabaseAdmin.from("profiles").upsert({ id: userId, email: identity.email }, { onConflict: "id", ignoreDuplicates: true });
     if (createdProfile.error) throw new Error("Unable to save your account.");
   }
+  // Setup already finished elsewhere (saved in Firebase users/<uid>): restore it so login never asks again.
+  if (!profile.data?.profile_completed) await restoreFromFirebase(supabaseAdmin, userId, identity.uid);
   if (link.error || !link.data.properties.hashed_token) throw new Error("Unable to sign in. Please retry.");
   const url = process.env['SUPABASE_URL'];
   const key = process.env['SUPABASE_PUBLISHABLE_KEY'];
@@ -62,3 +64,25 @@ export const exchangeFirebaseIdentity = createServerFn({ method: "POST" })
   if (verified.error || !verified.data.session) throw new Error("Unable to sign in. Please retry.");
   return { access_token: verified.data.session.access_token, refresh_token: verified.data.session.refresh_token };
 });
+
+// Reads the user's saved Firebase profile (name + photo link) and marks setup done.
+async function restoreFromFirebase(db: any, userId: string, uid: string) {
+  const sa = process.env["FIREBASE_SERVICE_ACCOUNT"];
+  if (!sa) return;
+  try {
+    const { getAccessToken } = await import("./firebase-mirror.server");
+    const token = await getAccessToken(JSON.parse(sa));
+    const res = await fetch(`${firebaseConfig.databaseURL}/users/${encodeURIComponent(uid)}.json?access_token=${encodeURIComponent(token)}`, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return;
+    const fb = (await res.json()) as { name?: unknown; photoUrl?: unknown; country?: unknown } | null;
+    const name = typeof fb?.name === "string" ? fb.name.trim().slice(0, 100) : "";
+    const photo = typeof fb?.photoUrl === "string" && /^https:\/\//.test(fb.photoUrl) ? fb.photoUrl.slice(0, 1000) : "";
+    if (!name || !photo) return;
+    await db.from("profiles").update({
+      full_name: name, avatar_url: photo, profile_completed: true,
+      ...(typeof fb?.country === "string" ? { country: fb.country.slice(0, 60) } : {}),
+    }).eq("id", userId);
+  } catch (e) {
+    console.error("Firebase profile restore failed", e);
+  }
+}
