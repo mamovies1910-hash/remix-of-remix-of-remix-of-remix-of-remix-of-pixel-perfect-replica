@@ -10,3 +10,6 @@
 - [ ] Admin: users (active), task submissions, withdrawals status/payment, tasks & videos
 - [ ] EN / HI / TE language switch
 - [ ] Mobile OTP — blocked: needs SMS provider credentials
+- [x] Firebase email + password login with email verification (no demo login)
+- [x] Profile name, email, photo link saved to Firebase Realtime Database users/<uid>; mobile only verified, not saved
+- [ ] Real SMS OTP for mobile verification — blocked: needs SMS provider
