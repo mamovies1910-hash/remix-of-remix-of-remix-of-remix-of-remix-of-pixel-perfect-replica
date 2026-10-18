@@ -22,6 +22,7 @@ import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
 import { Route as AuthenticatedAppAccountRouteImport } from './routes/_authenticated/_app/account'
 import { Route as AuthenticatedAppHomeRouteImport } from './routes/_authenticated/_app/home'
+import { Route as AuthenticatedAppInvestRouteImport } from './routes/_authenticated/_app/invest'
 import { Route as AuthenticatedAppLearnRouteImport } from './routes/_authenticated/_app/learn'
 import { Route as AuthenticatedAppNotificationsRouteImport } from './routes/_authenticated/_app/notifications'
 import { Route as AuthenticatedAppProfileRouteImport } from './routes/_authenticated/_app/profile'
@@ -92,6 +93,11 @@ const AuthenticatedAppHomeRoute = AuthenticatedAppHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedAppRouteRoute,
 } as any)
+const AuthenticatedAppInvestRoute = AuthenticatedAppInvestRouteImport.update({
+  id: '/invest',
+  path: '/invest',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
 const AuthenticatedAppLearnRoute = AuthenticatedAppLearnRouteImport.update({
   id: '/learn',
   path: '/learn',
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/setup': typeof AuthenticatedSetupRoute
   '/account': typeof AuthenticatedAppAccountRoute
   '/home': typeof AuthenticatedAppHomeRoute
+  '/invest': typeof AuthenticatedAppInvestRoute
   '/learn': typeof AuthenticatedAppLearnRoute
   '/notifications': typeof AuthenticatedAppNotificationsRoute
   '/profile': typeof AuthenticatedAppProfileRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/setup': typeof AuthenticatedSetupRoute
   '/account': typeof AuthenticatedAppAccountRoute
   '/home': typeof AuthenticatedAppHomeRoute
+  '/invest': typeof AuthenticatedAppInvestRoute
   '/learn': typeof AuthenticatedAppLearnRoute
   '/notifications': typeof AuthenticatedAppNotificationsRoute
   '/profile': typeof AuthenticatedAppProfileRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
   '/_authenticated/_app/account': typeof AuthenticatedAppAccountRoute
   '/_authenticated/_app/home': typeof AuthenticatedAppHomeRoute
+  '/_authenticated/_app/invest': typeof AuthenticatedAppInvestRoute
   '/_authenticated/_app/learn': typeof AuthenticatedAppLearnRoute
   '/_authenticated/_app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/_authenticated/_app/profile': typeof AuthenticatedAppProfileRoute
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
     | '/setup'
     | '/account'
     | '/home'
+    | '/invest'
     | '/learn'
     | '/notifications'
     | '/profile'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/setup'
     | '/account'
     | '/home'
+    | '/invest'
     | '/learn'
     | '/notifications'
     | '/profile'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/_authenticated/setup'
     | '/_authenticated/_app/account'
     | '/_authenticated/_app/home'
+    | '/_authenticated/_app/invest'
     | '/_authenticated/_app/learn'
     | '/_authenticated/_app/notifications'
     | '/_authenticated/_app/profile'
@@ -353,6 +365,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppHomeRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/_app/invest': {
+      id: '/_authenticated/_app/invest'
+      path: '/invest'
+      fullPath: '/invest'
+      preLoaderRoute: typeof AuthenticatedAppInvestRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/_app/learn': {
       id: '/_authenticated/_app/learn'
       path: '/learn'
@@ -401,6 +420,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppAccountRoute: typeof AuthenticatedAppAccountRoute
   AuthenticatedAppHomeRoute: typeof AuthenticatedAppHomeRoute
+  AuthenticatedAppInvestRoute: typeof AuthenticatedAppInvestRoute
   AuthenticatedAppLearnRoute: typeof AuthenticatedAppLearnRoute
   AuthenticatedAppNotificationsRoute: typeof AuthenticatedAppNotificationsRoute
   AuthenticatedAppProfileRoute: typeof AuthenticatedAppProfileRoute
@@ -412,6 +432,7 @@ interface AuthenticatedAppRouteRouteChildren {
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppAccountRoute: AuthenticatedAppAccountRoute,
   AuthenticatedAppHomeRoute: AuthenticatedAppHomeRoute,
+  AuthenticatedAppInvestRoute: AuthenticatedAppInvestRoute,
   AuthenticatedAppLearnRoute: AuthenticatedAppLearnRoute,
   AuthenticatedAppNotificationsRoute: AuthenticatedAppNotificationsRoute,
   AuthenticatedAppProfileRoute: AuthenticatedAppProfileRoute,
