@@ -67,7 +67,7 @@ export function TaskList({ limit }: { limit?: number }) {
   const now = useNow();
   const stats = new Map<string, { earned: number; last: number }>();
   for (const s of subs ?? []) {
-    const amt = Number("reward_amount" in s ? s.reward_amount : (s.tasks?.reward_amount ?? 0));
+    const amt = Number(s.reward_amount ?? 0);
     const at = new Date(s.submitted_at as string).getTime();
     const cur = stats.get(s.task_id) ?? { earned: 0, last: 0 };
     stats.set(s.task_id, { earned: cur.earned + amt, last: Math.max(cur.last, at) });
