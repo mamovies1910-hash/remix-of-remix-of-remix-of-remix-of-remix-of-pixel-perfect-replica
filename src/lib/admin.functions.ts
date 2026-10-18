@@ -8,6 +8,19 @@ function safeEqual(a: string, b: string) {
   return r === 0;
 }
 
+async function syncFirebase(db: unknown) {
+  const { mirrorToFirebase } = await import("./firebase-mirror.server");
+  await mirrorToFirebase(db);
+}
+
+export const adminSyncFirebase = createServerFn({ method: "POST" })
+  .inputValidator((d) => keyed({}).parse(d))
+  .handler(async ({ data }) => {
+    const db = await admin(data.key);
+    await syncFirebase(db);
+    return { ok: true };
+  });
+
 const keyed = <T extends z.ZodRawShape>(shape: T) => z.object({ key: z.string().min(1).max(200), ...shape });
 
 // Verifies the admin key and returns the privileged client. Throws on a wrong key.
@@ -60,6 +73,7 @@ export const adminAdjustBalance = createServerFn({ method: "POST" })
     const db = await admin(data.key);
     const { error } = await db.from("balance_adjustments").insert({ user_id: data.userId, amount: data.amount, note: data.note ?? null });
     if (error) throw new Error(error.message);
+    await syncFirebase(db);
     return { ok: true };
   });
 
@@ -69,6 +83,7 @@ export const adminSetUserStatus = createServerFn({ method: "POST" })
     const db = await admin(data.key);
     const { error } = await db.from("profiles").update({ account_status: data.status }).eq("id", data.userId);
     if (error) throw new Error(error.message);
+    await syncFirebase(db);
     return { ok: true };
   });
 
@@ -79,6 +94,7 @@ export const adminUpdateWithdrawal = createServerFn({ method: "POST" })
     const db = await admin(data.key);
     const { error } = await db.from("withdrawals").update({ status: data.status, provider_reference: data.reference ?? null }).eq("id", data.id);
     if (error) throw new Error(error.message);
+    await syncFirebase(db);
     return { ok: true };
   });
 
@@ -102,6 +118,7 @@ export const adminSaveTask = createServerFn({ method: "POST" })
     const { id, ...t } = data.task;
     const { error } = id ? await db.from("tasks").update(t).eq("id", id) : await db.from("tasks").insert(t);
     if (error) throw new Error(error.message);
+    await syncFirebase(db);
     return { ok: true };
   });
 
@@ -112,6 +129,7 @@ export const adminDeleteTask = createServerFn({ method: "POST" })
     // Hide instead of delete so past earnings stay intact.
     const { error } = await db.from("tasks").update({ is_active: false }).eq("id", data.id);
     if (error) throw new Error(error.message);
+    await syncFirebase(db);
     return { ok: true };
   });
 
@@ -122,6 +140,7 @@ export const adminSaveSettings = createServerFn({ method: "POST" })
     const { key: _k, ...s } = data;
     const { error } = await db.from("app_settings").upsert({ id: 1, ...s, updated_at: new Date().toISOString() });
     if (error) throw new Error(error.message);
+    await syncFirebase(db);
     return { ok: true };
   });
 
@@ -132,6 +151,7 @@ export const adminAddMedia = createServerFn({ method: "POST" })
     const { key: _k, ...m } = data;
     const { error } = await db.from("media_items").insert(m);
     if (error) throw new Error(error.message);
+    await syncFirebase(db);
     return { ok: true };
   });
 
@@ -141,6 +161,7 @@ export const adminDeleteMedia = createServerFn({ method: "POST" })
     const db = await admin(data.key);
     const { error } = await db.from("media_items").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    await syncFirebase(db);
     return { ok: true };
   });
 
@@ -180,6 +201,7 @@ export const adminFinishVideo = createServerFn({ method: "POST" })
     if (error || !s) throw new Error(error?.message ?? "Could not save video");
     const ins = await db.from("media_items").insert({ kind: "video", url: s.signedUrl, title: data.title, sort_order: data.sort_order });
     if (ins.error) throw new Error(ins.error.message);
+    await syncFirebase(db);
     return { ok: true };
   });
 
@@ -198,5 +220,6 @@ export const adminSaveGift = createServerFn({ method: "POST" })
     const { id, ...g } = data.gift;
     const { error } = id ? await db.from("reward_options").update(g).eq("id", id) : await db.from("reward_options").insert(g);
     if (error) throw new Error(error.message);
+    await syncFirebase(db);
     return { ok: true };
   });
