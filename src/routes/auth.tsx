@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { LangSelect, Logo } from "@/components/common";
 import { useT } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import { clearLoginHint, hasLoginHint } from "@/lib/login-hint";
 import { authError, firebaseAuth, firebaseLogin, firebaseResetPassword, firebaseSignUp } from "@/lib/firebase-auth";
 
 export const Route = createFileRoute("/auth")({
@@ -35,11 +36,17 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
+  const [leaving, setLeaving] = useState(false);
+  useLayoutEffect(() => { if (hasLoginHint()) setLeaving(true); }, []);
   useEffect(() => {
     let active = true;
     // Prepare Firebase while the user enters their email, not after submission.
     void firebaseAuth().catch(() => {});
-    supabase.auth.getUser().then(({ data }) => { if (active && !submitting.current && data.user) nav({ to: "/home" }); });
+    supabase.auth.getSession().then(({ data }) => {
+      if (!active || submitting.current) return;
+      if (data.session) nav({ to: "/home", replace: true });
+      else { clearLoginHint(); setLeaving(false); }
+    });
     return () => { active = false; };
   }, [nav]);
 
@@ -71,6 +78,8 @@ function AuthPage() {
     try { await firebaseResetPassword(email.trim()); toast.success("Password reset link sent to your email"); }
     catch (err) { toast.error(authError(err)); }
   }
+
+  if (leaving) return <div className="min-h-screen bg-soft" />;
 
   return (
     <div className="min-h-screen bg-soft">

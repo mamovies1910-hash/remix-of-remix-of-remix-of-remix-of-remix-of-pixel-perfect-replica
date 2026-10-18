@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { money, useBalances, useProfile, useUser } from "@/lib/data";
 import { demoSignOut, readDemoUser } from "@/lib/demo-auth";
 import { firebaseSignOut } from "@/lib/firebase-auth";
+import { clearLoginHint } from "@/lib/login-hint";
 import { clearDemoSubs } from "@/lib/demo-tasks";
 
 export const Route = createFileRoute("/_authenticated/_app/account")({
@@ -73,7 +74,7 @@ function AccountPage() {
         </div>
       </Card>
 
-      <Button variant="outline" className="w-full" onClick={async () => { await qc.cancelQueries(); qc.clear(); demoSignOut(); clearDemoSubs(); await Promise.all([firebaseSignOut().catch(() => {}), supabase.auth.signOut()]); await nav({ to: "/auth", search: { mode: "login" }, replace: true }); }}><LogOut /> Log out</Button>
+      <Button variant="outline" className="w-full" onClick={async () => { await qc.cancelQueries(); qc.clear(); clearLoginHint(); demoSignOut(); clearDemoSubs(); await Promise.all([firebaseSignOut().catch(() => {}), supabase.auth.signOut()]); await nav({ to: "/auth", search: { mode: "login" }, replace: true }); }}><LogOut /> Log out</Button>
     </div>
   );
 }

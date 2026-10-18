@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { I18nProvider } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import { clearLoginHint } from "@/lib/login-hint";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -124,7 +125,7 @@ function RootComponent() {
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
-      if (event === "SIGNED_OUT") queryClient.clear();
+      if (event === "SIGNED_OUT") { clearLoginHint(); queryClient.clear(); }
       else queryClient.invalidateQueries();
     });
     return () => data.subscription.unsubscribe();

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, PlayCircle, Mail, ShieldCheck, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import hero from "@/assets/hero.jpg";
@@ -10,6 +10,7 @@ import { LangSelect, Logo } from "@/components/common";
 import { useT } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useMedia } from "@/lib/data";
+import { hasLoginHint } from "@/lib/login-hint";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,6 +32,11 @@ function Welcome() {
   const { data: adminVideos } = useMedia("video");
   const videos = adminVideos?.length ? adminVideos : [promo1, promo2];
   const [signedIn, setSignedIn] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+  // Logged in on this device: go to Home immediately, before the landing page shows.
+  useLayoutEffect(() => {
+    if (hasLoginHint()) { setLeaving(true); nav({ to: "/home", replace: true }); }
+  }, [nav]);
   useEffect(() => {
     // Already logged in on this device: open the app directly.
     supabase.auth.getSession().then(({ data }) => {
@@ -39,6 +45,7 @@ function Welcome() {
     });
   }, [nav]);
 
+  if (leaving) return <div className="min-h-screen bg-soft" />;
 
   return (
     <div className="min-h-screen bg-soft">
