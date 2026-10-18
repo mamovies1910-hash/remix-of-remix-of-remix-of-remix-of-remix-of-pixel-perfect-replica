@@ -3,6 +3,7 @@ import { ArrowRight, Wallet } from "lucide-react";
 import { useState } from "react";
 import { HeroSlider } from "@/components/hero-slider";
 import { TaskList } from "@/components/task-list";
+import { InvestList } from "@/components/invest-list";
 import { money, useAnnouncement, useBalances, useProfile } from "@/lib/data";
 import { SLIDES } from "@/lib/slides";
 
@@ -36,7 +37,14 @@ function HomePage() {
           <h2 className="font-semibold">Tasks</h2>
           <Link to="/tasks" className="flex items-center gap-1 text-sm text-primary">See all <ArrowRight className="h-4 w-4" /></Link>
         </div>
-        <TaskList limit={5} />
+        <TaskList limit={2} />
+      </div>
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-semibold">Invest</h2>
+          <Link to="/invest" className="flex items-center gap-1 text-sm text-primary">See all <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+        <InvestList limit={2} />
       </div>
     </div>
   );
