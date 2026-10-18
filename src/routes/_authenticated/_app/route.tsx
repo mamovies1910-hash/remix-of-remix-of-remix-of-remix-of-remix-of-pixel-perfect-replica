@@ -28,7 +28,6 @@ function AppShell() {
   const { t } = useT();
   const { userId, accountStatus } = Route.useRouteContext();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const { data: isAdmin } = useIsAdmin();
 
   useEffect(() => {
     if (userId === "demo-user") return;
@@ -45,9 +44,6 @@ function AppShell() {
               <n.icon className="h-5 w-5" /> {n.label}
             </Link>
           ))}
-          {isAdmin && (
-            <Link to="/admin" className="mt-4 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-sidebar-accent"><Shield className="h-5 w-5" /> {t("admin")}</Link>
-          )}
         </nav>
         <div className="mt-auto"><LangSelect className="w-full" /></div>
       </aside>
@@ -57,7 +53,6 @@ function AppShell() {
           <div className="md:hidden"><Logo /></div>
           <div className="hidden md:block" />
           <div className="flex items-center gap-2">
-            {isAdmin && <Link to="/admin" className="grid h-10 w-10 place-items-center rounded-xl hover:bg-muted md:hidden" aria-label="Admin"><Shield className="h-5 w-5" /></Link>}
             <div className="md:hidden"><LangSelect /></div>
             <Link to="/notifications" className="grid h-10 w-10 place-items-center rounded-xl hover:bg-muted" aria-label={t("notifications")}><Bell className="h-5 w-5" /></Link>
           </div>

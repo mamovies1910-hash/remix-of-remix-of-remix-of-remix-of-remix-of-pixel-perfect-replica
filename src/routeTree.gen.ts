@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CreateAccountRouteImport } from './routes/create-account'
 import { Route as HelpRouteImport } from './routes/help'
@@ -18,7 +19,6 @@ import { Route as PhoneSignupRouteImport } from './routes/phone-signup'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/_app/route'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
 import { Route as AuthenticatedAppAccountRouteImport } from './routes/_authenticated/_app/account'
 import { Route as AuthenticatedAppHomeRouteImport } from './routes/_authenticated/_app/home'
@@ -36,6 +36,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -70,11 +75,6 @@ const TermsRoute = TermsRouteImport.update({
 } as any)
 const AuthenticatedAppRouteRoute = AuthenticatedAppRouteRouteImport.update({
   id: '/_app',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSetupRoute = AuthenticatedSetupRouteImport.update({
@@ -128,13 +128,13 @@ const AuthenticatedAppWithdrawRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/create-account': typeof CreateAccountRoute
   '/help': typeof HelpRoute
   '/phone-signup': typeof PhoneSignupRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/account': typeof AuthenticatedAppAccountRoute
   '/home': typeof AuthenticatedAppHomeRoute
@@ -147,13 +147,13 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/create-account': typeof CreateAccountRoute
   '/help': typeof HelpRoute
   '/phone-signup': typeof PhoneSignupRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/account': typeof AuthenticatedAppAccountRoute
   '/home': typeof AuthenticatedAppHomeRoute
@@ -168,6 +168,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/create-account': typeof CreateAccountRoute
   '/help': typeof HelpRoute
@@ -175,7 +176,6 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/_authenticated/_app': typeof AuthenticatedAppRouteRouteWithChildren
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
   '/_authenticated/_app/account': typeof AuthenticatedAppAccountRoute
   '/_authenticated/_app/home': typeof AuthenticatedAppHomeRoute
@@ -190,13 +190,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/create-account'
     | '/help'
     | '/phone-signup'
     | '/privacy'
     | '/terms'
-    | '/admin'
     | '/setup'
     | '/account'
     | '/home'
@@ -209,13 +209,13 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/auth'
     | '/create-account'
     | '/help'
     | '/phone-signup'
     | '/privacy'
     | '/terms'
-    | '/admin'
     | '/setup'
     | '/account'
     | '/home'
@@ -229,6 +229,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/admin'
     | '/auth'
     | '/create-account'
     | '/help'
@@ -236,7 +237,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/_authenticated/_app'
-    | '/_authenticated/admin'
     | '/_authenticated/setup'
     | '/_authenticated/_app/account'
     | '/_authenticated/_app/home'
@@ -251,6 +251,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   CreateAccountRoute: typeof CreateAccountRoute
   HelpRoute: typeof HelpRoute
@@ -273,6 +274,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -322,13 +330,6 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedAppRouteRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/setup': {
@@ -426,13 +427,11 @@ const AuthenticatedAppRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,
 }
 
@@ -442,6 +441,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   CreateAccountRoute: CreateAccountRoute,
   HelpRoute: HelpRoute,
