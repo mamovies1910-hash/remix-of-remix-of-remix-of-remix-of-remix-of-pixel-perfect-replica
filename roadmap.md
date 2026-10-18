@@ -13,3 +13,5 @@
 - [x] Firebase email + password login with email verification (no demo login)
 - [x] Profile name, email, photo link saved to Firebase Realtime Database users/<uid>; mobile only verified, not saved
 - [ ] Real SMS OTP for mobile verification — blocked: needs SMS provider
+
+- [ ] Review supplied OTP API requests and connect real mobile verification — pending provider authorization and secure session configuration
