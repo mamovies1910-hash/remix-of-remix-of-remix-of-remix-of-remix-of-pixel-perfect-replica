@@ -75,6 +75,13 @@ export function TaskList({ limit }: { limit?: number }) {
   const rankOf = new Map([...(tasks ?? [])].sort((a, b) => a.reward_amount - b.reward_amount).map((t, i) => [t.id, i]));
   const list = limit ? tasks?.slice(0, limit) : tasks;
 
+  // Visit / social / install tasks open their link first, then the timer runs before Claim.
+  function startTask(t: Task) {
+    const url = "action_url" in t ? t.action_url : null;
+    if (url && /^https?:\/\//.test(url)) window.open(url, "_blank", "noopener");
+    setOpen(t);
+  }
+
   if (isLoading) return <div className="space-y-3">{[0, 1, 2].map((k) => <Skeleton key={k} className="h-40 rounded-2xl" />)}</div>;
   if (!list?.length) return <Empty icon={<PlayCircle />} title="No tasks right now" text="Check back soon." />;
 
@@ -106,8 +113,8 @@ export function TaskList({ limit }: { limit?: number }) {
                     </div>
                   </div>
                 ) : (
-                  <Button variant="hero" className="w-full" onClick={() => setOpen(t)}>
-                    <PlayCircle /> Start Task · Earn {money(t.reward_amount)}
+                  <Button variant="hero" className="w-full" onClick={() => startTask(t)}>
+                    <PlayCircle /> {("button_label" in t && t.button_label) || "Start Task"} · Earn {money(t.reward_amount)}
                   </Button>
                 )}
               </div>
@@ -215,7 +222,8 @@ function Doodles({ color }: { color: string }) {
 
 function AdPlayer({ task, onClose }: { task: Task; onClose: () => void }) {
   const qc = useQueryClient();
-  const [left, setLeft] = useState(AD_SECONDS);
+  const seconds = "duration_seconds" in task && typeof task.duration_seconds === "number" ? task.duration_seconds : AD_SECONDS;
+  const [left, setLeft] = useState(seconds);
   const [busy, setBusy] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
   const [theme] = useState(() => AD_THEMES[Math.floor(Math.random() * AD_THEMES.length)]!);
@@ -230,7 +238,7 @@ function AdPlayer({ task, onClose }: { task: Task; onClose: () => void }) {
     if (readDemoUser()) {
       completeDemoTask(task.id, task.reward_amount);
     } else {
-      const { error } = await supabase.rpc("submit_task", { _task_id: task.id, _evidence: `Ad watched fully (${AD_SECONDS}s) at ${new Date().toISOString()}` });
+      const { error } = await supabase.rpc("submit_task", { _task_id: task.id, _evidence: `Task timer completed (${seconds}s) at ${new Date().toISOString()}` });
       if (error) { setBusy(false); toast.error(errMsg(error)); return; }
       toast.success(`${money(task.reward_amount)} added to pending — credited after review`);
     }
@@ -244,7 +252,7 @@ function AdPlayer({ task, onClose }: { task: Task; onClose: () => void }) {
     }, 2800);
   }
 
-  const pct = ((AD_SECONDS - left) / AD_SECONDS) * 100;
+  const pct = seconds > 0 ? ((seconds - left) / seconds) * 100 : 100;
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={{ background: theme.bg, color: theme.fg }}>
       <Doodles color={theme.fg} />
