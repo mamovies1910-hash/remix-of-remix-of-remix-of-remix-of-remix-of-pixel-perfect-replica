@@ -200,6 +200,39 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_options: {
+        Row: {
+          amount: number
+          brand: string
+          created_at: string
+          daily_limit_per_user: number | null
+          id: string
+          is_active: boolean
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          amount: number
+          brand: string
+          created_at?: string
+          daily_limit_per_user?: number | null
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          amount?: number
+          brand?: string
+          created_at?: string
+          daily_limit_per_user?: number | null
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
       task_submissions: {
         Row: {
           evidence: string | null
@@ -310,6 +343,8 @@ export type Database = {
           id: string
           payout_method_id: string | null
           provider_reference: string | null
+          reward_label: string | null
+          reward_option_id: string | null
           status: string
           user_id: string
         }
@@ -321,6 +356,8 @@ export type Database = {
           id?: string
           payout_method_id?: string | null
           provider_reference?: string | null
+          reward_label?: string | null
+          reward_option_id?: string | null
           status?: string
           user_id: string
         }
@@ -332,6 +369,8 @@ export type Database = {
           id?: string
           payout_method_id?: string | null
           provider_reference?: string | null
+          reward_label?: string | null
+          reward_option_id?: string | null
           status?: string
           user_id?: string
         }
@@ -341,6 +380,13 @@ export type Database = {
             columns: ["payout_method_id"]
             isOneToOne: false
             referencedRelation: "payout_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "withdrawals_reward_option_id_fkey"
+            columns: ["reward_option_id"]
+            isOneToOne: false
+            referencedRelation: "reward_options"
             referencedColumns: ["id"]
           },
         ]
@@ -370,6 +416,7 @@ export type Database = {
         }[]
       }
       has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
+      request_redeem: { Args: { _option_id: string }; Returns: undefined }
       request_withdrawal: {
         Args: { _amount: number; _payout_method_id: string }
         Returns: undefined
