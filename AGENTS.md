@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Country flags render through the `Flag` component (`src/components/flag.tsx`, flag-icons SVGs), never emoji flags — many phones show emoji flags as plain letters like "IN".
+- Login uses Firebase Authentication (email/password, verified email required); the server exchanges the Firebase ID token for an app session so balances stay protected by database rules. Why: money data must not be writable from the browser.

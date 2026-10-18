@@ -6,16 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LangSelect, Logo } from "@/components/common";
 import { useT } from "@/lib/i18n";
-import { isDemoSignedIn } from "@/lib/demo-auth";
 import { supabase } from "@/integrations/supabase/client";
-
-function PhoneIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="7" y="2" width="10" height="20" rx="2" /><path d="M11 18h2" />
-    </svg>
-  );
-}
+import { authError, firebaseLogin, firebaseResetPassword, firebaseSignUp } from "@/lib/firebase-auth";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({ mode: s["mode"] === "signup" ? ("signup" as const) : ("login" as const) }),
@@ -40,7 +32,7 @@ function AuthPage() {
   const [sent, setSent] = useState(false);
 
   useEffect(() => {
-    if (isDemoSignedIn()) nav({ to: "/home" });
+    supabase.auth.getSession().then(({ data }) => { if (data.session) nav({ to: "/home" }); });
   }, [nav]);
 
   async function submit(e: React.FormEvent) {
@@ -48,24 +40,28 @@ function AuthPage() {
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
-          email, password, options: { emailRedirectTo: window.location.origin + "/home" },
-        });
-        if (error) throw error;
-        if (data.session) nav({ to: "/home" });
-        else setSent(true);
+        await firebaseSignUp(email.trim(), password);
+        setSent(true);
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        const r = await firebaseLogin(email.trim(), password);
+        if (!r.verified) {
+          toast.error("Please verify your email first. We sent the link again — check inbox and spam.");
+          return;
+        }
         toast.success("Logged in");
         nav({ to: "/home" });
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Something went wrong";
-      toast.error(msg.includes("Email not confirmed") ? "Please verify your email first — check your inbox." : msg);
+      toast.error(authError(err));
     } finally {
       setBusy(false);
     }
+  }
+
+  async function forgot() {
+    if (!email.trim()) { toast.error("Enter your email first"); return; }
+    try { await firebaseResetPassword(email.trim()); toast.success("Password reset link sent to your email"); }
+    catch (err) { toast.error(authError(err)); }
   }
 
   return (
@@ -75,17 +71,14 @@ function AuthPage() {
         <div className="rounded-3xl border bg-card p-6 shadow-card">
           <h1 className="text-2xl font-bold">{mode === "signup" ? "Create your account" : t("login")}</h1>
           {sent ? (
-            <p className="mt-4 rounded-xl bg-primary-soft p-4 text-sm text-primary">Check your email and click the confirmation link to activate your account.</p>
+            <p className="mt-4 rounded-xl bg-primary-soft p-4 text-sm text-primary">We sent a verification link to your email. Open it, then come back and log in. Check spam if you don&apos;t see it.</p>
           ) : (
             <>
-              <Button variant="outline" size="lg" className="mt-5 w-full" onClick={() => nav({ to: "/phone-signup" })}>
-                <PhoneIcon /> {mode === "signup" ? "Continue with mobile" : "Continue with number"}
-              </Button>
-              <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />or<span className="h-px flex-1 bg-border" /></div>
-              <form onSubmit={submit} className="space-y-4">
+              <form onSubmit={submit} className="mt-5 space-y-4">
                 <div className="space-y-1.5"><Label htmlFor="email">{t("email")}</Label><Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
                 <div className="space-y-1.5"><Label htmlFor="pw">Password</Label><Input id="pw" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
-                <Button type="submit" variant="hero" size="lg" className="w-full" disabled={busy}>{busy ? "…" : mode === "signup" ? "Sign up" : t("login")}</Button>
+                <Button type="submit" variant="hero" size="lg" className="w-full" disabled={busy}>{busy ? "Please wait…" : mode === "signup" ? "Sign up" : t("login")}</Button>
+                {mode === "login" && <button type="button" onClick={forgot} className="w-full text-center text-sm font-semibold text-primary">Forgot password?</button>}
               </form>
             </>
           )}

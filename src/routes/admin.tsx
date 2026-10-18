@@ -140,7 +140,7 @@ function UsersTab({ d, k, reload }: TabProps) {
           </tr></thead>
           <tbody>{list.map((u) => (
             <tr key={u.id} className="border-t">
-              <td className="p-2"><div className="font-medium">{u.full_name ?? "—"}</div><div className="text-xs text-muted-foreground">{u.email ?? u.phone ?? "—"}</div></td>
+              <td className="p-2"><div className="flex items-center gap-2">{u.avatar_url ? <img src={u.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover" /> : <div className="h-9 w-9 rounded-full bg-muted" />}<div><div className="font-medium">{u.full_name ?? "—"}</div><div className="text-xs text-muted-foreground">{u.email ?? "—"}</div></div></div></td>
               <td className="p-2 font-semibold">{inr(u.available)}</td><td className="p-2">{inr(u.earned)}</td><td className="p-2">{inr(u.withdrawn)}</td>
               <td className="p-2">{fmt(u.created_at)}</td><td className="p-2">{fmt(u.last_seen_at)}</td>
               <td className="p-2"><span className={u.account_status === "blocked" ? "text-destructive" : "text-success"}>{u.account_status}</span></td>

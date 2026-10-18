@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, PlayCircle, Mail, ShieldCheck, Smartphone, Wallet } from "lucide-react";
+import { ArrowRight, CheckCircle2, PlayCircle, Mail, ShieldCheck, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import hero from "@/assets/hero.jpg";
 import promo1 from "@/assets/promo-1.mp4.asset.json";
@@ -8,7 +8,7 @@ import promo2 from "@/assets/promo-2.mp4.asset.json";
 import { Button } from "@/components/ui/button";
 import { LangSelect, Logo } from "@/components/common";
 import { useT } from "@/lib/i18n";
-import { isDemoSignedIn } from "@/lib/demo-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { useMedia } from "@/lib/data";
 
 export const Route = createFileRoute("/")({
@@ -32,7 +32,7 @@ function Welcome() {
   const videos = adminVideos?.length ? adminVideos : [promo1, promo2];
   const [signedIn, setSignedIn] = useState(false);
   useEffect(() => {
-    setSignedIn(isDemoSignedIn());
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
   }, []);
 
 
@@ -60,9 +60,6 @@ function Welcome() {
           <div className="mt-8 flex flex-col gap-3 sm:max-w-sm">
             <Button asChild variant="hero" size="lg">
               <Link to="/auth" search={{ mode: "signup" }}><Mail /> Sign up with Email</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link to="/phone-signup"><Smartphone /> Sign up with mobile number</Link>
             </Button>
             <p className="text-sm text-muted-foreground">
               {t("haveAccount")} <Link to="/auth" search={{ mode: "login" }} className="font-semibold text-primary">{t("login")}</Link>
