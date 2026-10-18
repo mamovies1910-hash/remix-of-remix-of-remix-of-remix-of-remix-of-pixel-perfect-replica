@@ -3,7 +3,7 @@ import { ArrowRight, Wallet } from "lucide-react";
 import { useState } from "react";
 import { HeroSlider } from "@/components/hero-slider";
 import { TaskList } from "@/components/task-list";
-import { money, useBalances, useProfile } from "@/lib/data";
+import { money, useAnnouncement, useBalances, useProfile } from "@/lib/data";
 import { SLIDES } from "@/lib/slides";
 
 export const Route = createFileRoute("/_authenticated/_app/home")({
@@ -14,12 +14,14 @@ export const Route = createFileRoute("/_authenticated/_app/home")({
 function HomePage() {
   const { data: p } = useProfile();
   const { data: b } = useBalances();
+  const { data: notice } = useAnnouncement();
   const [slide, setSlide] = useState(0);
   return (
     <div
       className="-m-4 min-h-full space-y-6 p-4 transition-colors duration-700"
-      style={{ backgroundColor: SLIDES[slide]?.pageBg }}
+      style={{ backgroundColor: SLIDES[slide % SLIDES.length]?.pageBg }}
     >
+      {notice && <div className="rounded-2xl border bg-card px-4 py-3 text-sm font-medium shadow-card">📢 {notice}</div>}
       <HeroSlider onSlideChange={setSlide} />
       <Link to="/account" className="flex items-center justify-between rounded-2xl border bg-card p-4 shadow-card">
         <div>

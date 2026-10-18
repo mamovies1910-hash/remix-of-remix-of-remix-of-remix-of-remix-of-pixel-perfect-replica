@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { SLIDES } from "@/lib/slides";
+import { SLIDES as BUILTIN } from "@/lib/slides";
+import { useMedia } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
 // Decorative doodles (flowers, leaves, coins, stars) drawn on the colored band
@@ -53,6 +54,11 @@ function Doodles({ tint }: { tint: string }) {
 }
 
 export function HeroSlider({ onSlideChange }: { onSlideChange?: (index: number) => void }) {
+  const { data: media } = useMedia("slide");
+  // Admin-uploaded slides replace the built-in ones; colors cycle from the built-in themes.
+  const SLIDES = media?.length
+    ? media.map((m, n) => ({ ...BUILTIN[n % BUILTIN.length]!, image: m.url, alt: m.title ?? "Slide" }))
+    : BUILTIN;
   const [i, setI] = useState(0);
   useEffect(() => {
     const id = setTimeout(() => setI((x) => (x + 1) % SLIDES.length), 5000);
@@ -62,7 +68,7 @@ export function HeroSlider({ onSlideChange }: { onSlideChange?: (index: number) 
     onSlideChange?.(i);
   }, [i, onSlideChange]);
 
-  const active = SLIDES[i]!;
+  const active = SLIDES[i % SLIDES.length]!;
 
   return (
     <div className="relative overflow-hidden rounded-3xl shadow-elegant">

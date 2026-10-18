@@ -119,7 +119,7 @@ export function useTasks() {
           { id: "demo-5", title: "Share with a friend", description: "Share the app link with a friend.", reward_amount: 15, is_active: true, created_at: new Date().toISOString() },
         ];
       }
-      const { data, error } = await supabase.from("tasks").select("*").eq("is_active", true).order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("tasks").select("*").eq("is_active", true).order("sort_order").order("created_at");
       if (error) throw error;
       return data;
     },
@@ -140,3 +140,25 @@ export const STATUS_TONE: Record<string, string> = {
   active: "bg-success/15 text-success",
   suspended: "bg-destructive/15 text-destructive",
 };
+
+// Admin-managed home sliders / videos and the notice board. Empty list = use built-in ones.
+export function useMedia(kind: "slide" | "video") {
+  return useQuery({
+    queryKey: ["media", kind],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("media_items").select("id, url, title").eq("kind", kind).eq("is_active", true).order("sort_order").order("created_at");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useAnnouncement() {
+  return useQuery({
+    queryKey: ["announcement"],
+    queryFn: async () => {
+      const { data } = await supabase.from("app_settings").select("announcement").eq("id", 1).maybeSingle();
+      return data?.announcement ?? null;
+    },
+  });
+}
