@@ -1,7 +1,7 @@
 // Copies admin-managed data (sliders, videos, tasks, gift cards, settings, user balances,
 // withdrawals) into Firebase Realtime Database after every admin change.
 // Uses the database secret so only the server can write; skipped if not configured.
-type Db = Awaited<ReturnType<typeof import("@/integrations/supabase/client.server")["supabaseAdmin"]["from"]>> extends never ? never : any;
+type Db = any;
 
 const DB_URL = "https://vfgtht-6bdbd-default-rtdb.firebaseio.com";
 
