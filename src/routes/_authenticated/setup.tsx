@@ -14,7 +14,8 @@ import { useT, type Lang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { fileToAvatar } from "@/lib/avatar";
 import { clearPending, readPending } from "@/lib/pending-signup";
-import { demoSignIn, readDemoUser } from "@/lib/demo-auth";
+import { uploadAvatar } from "@/lib/avatar.functions";
+import { saveFirebaseProfile } from "@/lib/firebase-auth";
 import { COUNTRIES } from "@/lib/countries";
 import { Flag } from "@/components/flag";
 
@@ -49,22 +50,28 @@ function Setup() {
 
   async function finish() {
     setBusy(true);
-    if (readDemoUser()) {
-      // Demo mode: no backend — save details locally and go Home.
-      demoSignIn({ full_name: f.full_name.trim(), phone: f.phone.trim(), ...(f.avatar_url ? { avatar_url: f.avatar_url } : {}), email });
-      setBusy(false);
+    try {
+      // Photo goes to imgBB; only its link is saved.
+      let avatar = f.avatar_url;
+      if (avatar?.startsWith("data:")) avatar = (await uploadAvatar({ data: { image: avatar } })).url;
+      const full_name = f.full_name.trim();
+      // The mobile number is only verified, never saved.
+      const { error } = await supabase.from("profiles").update({
+        full_name, country: f.country, preferred_language: f.preferred_language, avatar_url: avatar, phone: null, profile_completed: true,
+      }).eq("id", p!.id);
+      if (error) throw error;
+      await saveFirebaseProfile({ name: full_name, email, photoUrl: avatar ?? null, country: f.country }).catch(() => {
+        toast.warning("Profile saved, but Firebase could not store a copy. Check Firebase database rules.");
+      });
       clearPending();
       setLang(f.preferred_language as Lang);
+      await qc.invalidateQueries({ queryKey: ["profile"] });
       nav({ to: "/home" });
-      return;
+    } catch (err) {
+      toast.error(errMsg(err));
+    } finally {
+      setBusy(false);
     }
-    const { error } = await supabase.from("profiles").update({ ...f, full_name: f.full_name.trim(), phone: f.phone.trim(), profile_completed: true }).eq("id", p!.id);
-    setBusy(false);
-    if (error) { toast.error(errMsg(error)); return; }
-    clearPending();
-    setLang(f.preferred_language as Lang);
-    await qc.invalidateQueries({ queryKey: ["profile"] });
-    nav({ to: "/home" });
   }
 
   const steps = [t("photo"), t("personal"), t("review")];
@@ -111,7 +118,7 @@ function Setup() {
           )}
           {step === 2 && (
             <div className="space-y-3 text-sm">
-              {[[t("fullName"), f.full_name], [t("email"), email], [t("mobile"), f.phone]].map(([k, v]) => (
+              {[[t("fullName"), f.full_name], [t("email"), email], [t("mobile"), `${f.phone} ✓`]].map(([k, v]) => (
                 <div key={k} className="flex justify-between border-b pb-2"><span className="text-muted-foreground">{k}</span><span className="font-medium">{v}</span></div>
               ))}
               <label className="flex items-start gap-3 pt-2">
