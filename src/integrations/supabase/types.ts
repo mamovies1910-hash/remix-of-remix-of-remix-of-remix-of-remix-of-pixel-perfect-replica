@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       app_settings: {
         Row: {
+          announcement: string | null
           currency: string
           fee_flat: number
           fee_percent: number
@@ -24,6 +25,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          announcement?: string | null
           currency?: string
           fee_flat?: number
           fee_percent?: number
@@ -32,12 +34,37 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          announcement?: string | null
           currency?: string
           fee_flat?: number
           fee_percent?: number
           id?: number
           min_withdrawal?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      balance_adjustments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -56,6 +83,36 @@ export type Database = {
           created_at?: string
           firebase_uid?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      media_items: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: string
+          sort_order: number
+          title: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind: string
+          sort_order?: number
+          title?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          sort_order?: number
+          title?: string | null
+          url?: string
         }
         Relationships: []
       }
@@ -186,27 +243,42 @@ export type Database = {
       }
       tasks: {
         Row: {
+          action_type: string
+          action_url: string | null
+          button_label: string | null
           created_at: string
           description: string | null
+          duration_seconds: number
           id: string
           is_active: boolean
           reward_amount: number
+          sort_order: number
           title: string
         }
         Insert: {
+          action_type?: string
+          action_url?: string | null
+          button_label?: string | null
           created_at?: string
           description?: string | null
+          duration_seconds?: number
           id?: string
           is_active?: boolean
           reward_amount?: number
+          sort_order?: number
           title: string
         }
         Update: {
+          action_type?: string
+          action_url?: string | null
+          button_label?: string | null
           created_at?: string
           description?: string | null
+          duration_seconds?: number
           id?: string
           is_active?: boolean
           reward_amount?: number
+          sort_order?: number
           title?: string
         }
         Relationships: []
@@ -278,6 +350,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_user_balances: {
+        Args: never
+        Returns: {
+          adjusted: number
+          earned: number
+          held: number
+          user_id: string
+          withdrawn: number
+        }[]
+      }
       get_my_balances: {
         Args: never
         Returns: {
