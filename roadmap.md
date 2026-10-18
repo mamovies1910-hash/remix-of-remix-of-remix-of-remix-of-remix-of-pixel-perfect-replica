@@ -1,4 +1,5 @@
 # Unto Together roadmap
+- [ ] Make profile setup one-time and remove avoidable signup/login delays; verify persisted completion and repeat login.
 - [ ] Real Firebase Google/email accounts and persistent user details — pending secure Firebase server credentials and provider setup
 - [ ] ImgBB profile uploads — pending secure key storage
 - [ ] Persist and protect earnings/balances; admin visibility of name, phone and balances

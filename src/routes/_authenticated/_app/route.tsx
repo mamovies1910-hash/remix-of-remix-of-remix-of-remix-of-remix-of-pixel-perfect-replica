@@ -6,14 +6,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/lib/data";
 import { useT, type TKey } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { needsProfileSetup, profileOptions } from "@/lib/profile-query";
 
 export const Route = createFileRoute("/_authenticated/_app")({
   beforeLoad: async ({ context }) => {
     // Demo mode: skip the profile-completed check, the demo profile is always complete.
     if (context.userId === "demo-user") return { accountStatus: "active" };
-    const { data } = await supabase.from("profiles").select("profile_completed, account_status").eq("id", context.userId).maybeSingle();
-    if (!data?.profile_completed) throw redirect({ to: "/setup" });
-    return { accountStatus: data.account_status };
+    const profile = await context.queryClient.ensureQueryData(profileOptions(context.userId));
+    if (needsProfileSetup(profile)) throw redirect({ to: "/setup" });
+    return { accountStatus: profile?.account_status ?? "active" };
   },
   component: AppShell,
 });

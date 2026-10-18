@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Camera, Check, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -18,9 +18,14 @@ import { uploadAvatar } from "@/lib/avatar.functions";
 import { saveFirebaseProfile } from "@/lib/firebase-auth";
 import { COUNTRIES } from "@/lib/countries";
 import { Flag } from "@/components/flag";
+import { needsProfileSetup, profileOptions } from "@/lib/profile-query";
 
 export const Route = createFileRoute("/_authenticated/setup")({
-  head: () => ({ meta: [{ title: "Complete your profile — Earn to Each Other" }, { name: "description", content: "Set up your Earn to Each Other profile." }, { property: "og:title", content: "Profile setup — Earn to Each Other" }, { property: "og:description", content: "Set up your profile." }] }),
+  beforeLoad: async ({ context }) => {
+    const profile = await context.queryClient.ensureQueryData(profileOptions(context.userId));
+    if (!needsProfileSetup(profile)) throw redirect({ to: "/home" });
+  },
+  head: () => ({ meta: [{ title: "Complete your profile — Earn to Each Other" }, { name: "description", content: "Set up your Earn to Each Other profile." }, { property: "og:title", content: "Profile setup — Earn to Each Other" }, { property: "og:description", content: "Set up your profile." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Setup,
 });
 
@@ -49,6 +54,7 @@ function Setup() {
   const valid1 = f.full_name.trim().length >= 2 && verified;
 
   async function finish() {
+    if (!p || busy || !valid0 || !valid1 || !agree) return;
     setBusy(true);
     try {
       // Photo goes to imgBB; only its link is saved.
@@ -56,17 +62,20 @@ function Setup() {
       if (avatar?.startsWith("data:")) avatar = (await uploadAvatar({ data: { image: avatar } })).url;
       const full_name = f.full_name.trim();
       // The mobile number is only verified, never saved.
-      const { error } = await supabase.from("profiles").update({
+      const { data: saved, error } = await supabase.from("profiles").update({
         full_name, country: f.country, preferred_language: f.preferred_language, avatar_url: avatar, phone: null, profile_completed: true,
-      }).eq("id", p!.id);
+      }).eq("id", p.id).select("*").single();
       if (error) throw error;
-      await saveFirebaseProfile({ name: full_name, email, photoUrl: avatar ?? null, country: f.country }).catch(() => {
-        toast.warning("Profile saved, but Firebase could not store a copy. Check Firebase database rules.");
-      });
+      if (!saved.profile_completed) throw new Error("Profile could not be saved. Please retry.");
+      qc.setQueryData(profileOptions(p.id).queryKey, saved);
       clearPending();
       setLang(f.preferred_language as Lang);
-      await qc.invalidateQueries({ queryKey: ["profile"] });
-      nav({ to: "/home" });
+      // Do not keep the setup screen waiting for the secondary Firebase copy.
+      void Promise.race([
+        saveFirebaseProfile({ name: full_name, email, photoUrl: avatar ?? null, country: f.country }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Profile sync timed out")), 10_000)),
+      ]).catch(() => toast.warning("Profile saved. Firebase copy could not be confirmed yet."));
+      await nav({ to: "/home" });
     } catch (err) {
       toast.error(errMsg(err));
     } finally {
@@ -153,7 +162,8 @@ function PhoneVerify({ verified, onVerified, onChange }: { verified: boolean; on
   const [code, setCode] = useState("");
   const [otp, setOtp] = useState(["", "", "", ""]);
   const refs = useRef<(HTMLInputElement | null)[]>([]);
-  const c = COUNTRIES[ci] ?? COUNTRIES[0]!;
+  const c = COUNTRIES[ci] ?? COUNTRIES[0];
+  if (!c) return null;
 
   function send() {
     const n = String(Math.floor(1000 + Math.random() * 9000));
