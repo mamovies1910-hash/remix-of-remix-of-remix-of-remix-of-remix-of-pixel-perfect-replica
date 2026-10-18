@@ -6,10 +6,68 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LangSelect, Logo } from "@/components/common";
 import { useT } from "@/lib/i18n";
-import { GoogleIcon } from "@/components/google";
-import { demoSignIn, isDemoSignedIn } from "@/lib/demo-auth";
+import { isDemoSignedIn } from "@/lib/demo-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 function PhoneIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="7" y="2" width="10" height="20" rx="2" /><path d="M11 18h2" />
+    </svg>
+  );
+}
+
+export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>) => ({ mode: s["mode"] === "signup" ? ("signup" as const) : ("login" as const) }),
+  head: () => ({
+    meta: [
+      { title: "Log in or sign up — Earn to Each Other" },
+      { name: "description", content: "Access your Earn to Each Other account." },
+      { property: "og:title", content: "Log in — Earn to Each Other" },
+      { property: "og:description", content: "Access your Earn to Each Other account." },
+    ],
+  }),
+  component: AuthPage,
+});
+
+function AuthPage() {
+  const { mode } = Route.useSearch();
+  const { t } = useT();
+  const nav = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  useEffect(() => {
+    if (isDemoSignedIn()) nav({ to: "/home" });
+  }, [nav]);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      if (mode === "signup") {
+        const { data, error } = await supabase.auth.signUp({
+          email, password, options: { emailRedirectTo: window.location.origin + "/home" },
+        });
+        if (error) throw error;
+        if (data.session) nav({ to: "/home" });
+        else setSent(true);
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        toast.success("Logged in");
+        nav({ to: "/home" });
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Something went wrong";
+      toast.error(msg.includes("Email not confirmed") ? "Please verify your email first — check your inbox." : msg);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="7" y="2" width="10" height="20" rx="2" /><path d="M11 18h2" />
@@ -68,8 +126,7 @@ function AuthPage() {
             <p className="mt-4 rounded-xl bg-primary-soft p-4 text-sm text-primary">Check your email and click the confirmation link to activate your account.</p>
           ) : (
             <>
-              <Button variant="outline" size="lg" className="mt-5 w-full" onClick={withGoogle}><GoogleIcon /> Continue with Google</Button>
-              <Button variant="outline" size="lg" className="mt-3 w-full" onClick={() => nav({ to: "/phone-signup" })}>
+              <Button variant="outline" size="lg" className="mt-5 w-full" onClick={() => nav({ to: "/phone-signup" })}>
                 <PhoneIcon /> {mode === "signup" ? "Continue with mobile" : "Continue with number"}
               </Button>
               <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />or<span className="h-px flex-1 bg-border" /></div>
