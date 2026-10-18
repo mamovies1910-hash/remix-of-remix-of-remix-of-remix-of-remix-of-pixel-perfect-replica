@@ -1,9 +1,9 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyB6IgzTGdWZGOeAIWmZDsPMgUbckFtiW8s",
-  authDomain: "hhgggg-84718.firebaseapp.com",
-  databaseURL: "https://hhgggg-84718-default-rtdb.firebaseio.com",
-  projectId: "hhgggg-84718",
-  storageBucket: "hhgggg-84718.firebasestorage.app",
-  messagingSenderId: "281242519601",
-  appId: "1:281242519601:web:e3a8dc574702dd1612ed10",
+  apiKey: "AIzaSyDA4EPDFjLs1dhVyfTGRyzXzNLqsTvcYtE",
+  authDomain: "muhyc-c936f.firebaseapp.com",
+  databaseURL: "https://muhyc-c936f-default-rtdb.firebaseio.com",
+  projectId: "muhyc-c936f",
+  storageBucket: "muhyc-c936f.firebasestorage.app",
+  messagingSenderId: "984853568071",
+  appId: "1:984853568071:android:7bb301f987f2b2d9eaaf62",
 };
