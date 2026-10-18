@@ -10,33 +10,253 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CreateAccountRouteImport } from './routes/create-account'
+import { Route as HelpRouteImport } from './routes/help'
+import { Route as PhoneSignupRouteImport } from './routes/phone-signup'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/_app/route'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
+import { Route as AuthenticatedAppAccountRouteImport } from './routes/_authenticated/_app/account'
+import { Route as AuthenticatedAppHomeRouteImport } from './routes/_authenticated/_app/home'
+import { Route as AuthenticatedAppLearnRouteImport } from './routes/_authenticated/_app/learn'
+import { Route as AuthenticatedAppNotificationsRouteImport } from './routes/_authenticated/_app/notifications'
+import { Route as AuthenticatedAppProfileRouteImport } from './routes/_authenticated/_app/profile'
+import { Route as AuthenticatedAppTasksRouteImport } from './routes/_authenticated/_app/tasks'
+import { Route as AuthenticatedAppTransactionsRouteImport } from './routes/_authenticated/_app/transactions'
+import { Route as AuthenticatedAppWithdrawRouteImport } from './routes/_authenticated/_app/withdraw'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateAccountRoute = CreateAccountRouteImport.update({
+  id: '/create-account',
+  path: '/create-account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PhoneSignupRoute = PhoneSignupRouteImport.update({
+  id: '/phone-signup',
+  path: '/phone-signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAppRouteRoute = AuthenticatedAppRouteRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSetupRoute = AuthenticatedSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppAccountRoute = AuthenticatedAppAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
+const AuthenticatedAppHomeRoute = AuthenticatedAppHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
+const AuthenticatedAppLearnRoute = AuthenticatedAppLearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
+const AuthenticatedAppNotificationsRoute =
+  AuthenticatedAppNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedAppProfileRoute = AuthenticatedAppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
+const AuthenticatedAppTasksRoute = AuthenticatedAppTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
+const AuthenticatedAppTransactionsRoute =
+  AuthenticatedAppTransactionsRouteImport.update({
+    id: '/transactions',
+    path: '/transactions',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
+const AuthenticatedAppWithdrawRoute =
+  AuthenticatedAppWithdrawRouteImport.update({
+    id: '/withdraw',
+    path: '/withdraw',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/create-account': typeof CreateAccountRoute
+  '/help': typeof HelpRoute
+  '/phone-signup': typeof PhoneSignupRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/setup': typeof AuthenticatedSetupRoute
+  '/account': typeof AuthenticatedAppAccountRoute
+  '/home': typeof AuthenticatedAppHomeRoute
+  '/learn': typeof AuthenticatedAppLearnRoute
+  '/notifications': typeof AuthenticatedAppNotificationsRoute
+  '/profile': typeof AuthenticatedAppProfileRoute
+  '/tasks': typeof AuthenticatedAppTasksRoute
+  '/transactions': typeof AuthenticatedAppTransactionsRoute
+  '/withdraw': typeof AuthenticatedAppWithdrawRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/create-account': typeof CreateAccountRoute
+  '/help': typeof HelpRoute
+  '/phone-signup': typeof PhoneSignupRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/setup': typeof AuthenticatedSetupRoute
+  '/account': typeof AuthenticatedAppAccountRoute
+  '/home': typeof AuthenticatedAppHomeRoute
+  '/learn': typeof AuthenticatedAppLearnRoute
+  '/notifications': typeof AuthenticatedAppNotificationsRoute
+  '/profile': typeof AuthenticatedAppProfileRoute
+  '/tasks': typeof AuthenticatedAppTasksRoute
+  '/transactions': typeof AuthenticatedAppTransactionsRoute
+  '/withdraw': typeof AuthenticatedAppWithdrawRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/create-account': typeof CreateAccountRoute
+  '/help': typeof HelpRoute
+  '/phone-signup': typeof PhoneSignupRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
+  '/_authenticated/_app': typeof AuthenticatedAppRouteRouteWithChildren
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/setup': typeof AuthenticatedSetupRoute
+  '/_authenticated/_app/account': typeof AuthenticatedAppAccountRoute
+  '/_authenticated/_app/home': typeof AuthenticatedAppHomeRoute
+  '/_authenticated/_app/learn': typeof AuthenticatedAppLearnRoute
+  '/_authenticated/_app/notifications': typeof AuthenticatedAppNotificationsRoute
+  '/_authenticated/_app/profile': typeof AuthenticatedAppProfileRoute
+  '/_authenticated/_app/tasks': typeof AuthenticatedAppTasksRoute
+  '/_authenticated/_app/transactions': typeof AuthenticatedAppTransactionsRoute
+  '/_authenticated/_app/withdraw': typeof AuthenticatedAppWithdrawRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/create-account'
+    | '/help'
+    | '/phone-signup'
+    | '/privacy'
+    | '/terms'
+    | '/admin'
+    | '/setup'
+    | '/account'
+    | '/home'
+    | '/learn'
+    | '/notifications'
+    | '/profile'
+    | '/tasks'
+    | '/transactions'
+    | '/withdraw'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/create-account'
+    | '/help'
+    | '/phone-signup'
+    | '/privacy'
+    | '/terms'
+    | '/admin'
+    | '/setup'
+    | '/account'
+    | '/home'
+    | '/learn'
+    | '/notifications'
+    | '/profile'
+    | '/tasks'
+    | '/transactions'
+    | '/withdraw'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/create-account'
+    | '/help'
+    | '/phone-signup'
+    | '/privacy'
+    | '/terms'
+    | '/_authenticated/_app'
+    | '/_authenticated/admin'
+    | '/_authenticated/setup'
+    | '/_authenticated/_app/account'
+    | '/_authenticated/_app/home'
+    | '/_authenticated/_app/learn'
+    | '/_authenticated/_app/notifications'
+    | '/_authenticated/_app/profile'
+    | '/_authenticated/_app/tasks'
+    | '/_authenticated/_app/transactions'
+    | '/_authenticated/_app/withdraw'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  CreateAccountRoute: typeof CreateAccountRoute
+  HelpRoute: typeof HelpRoute
+  PhoneSignupRoute: typeof PhoneSignupRoute
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +268,186 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-account': {
+      id: '/create-account'
+      path: '/create-account'
+      fullPath: '/create-account'
+      preLoaderRoute: typeof CreateAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/phone-signup': {
+      id: '/phone-signup'
+      path: '/phone-signup'
+      fullPath: '/phone-signup'
+      preLoaderRoute: typeof PhoneSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/_app': {
+      id: '/_authenticated/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedAppRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/setup': {
+      id: '/_authenticated/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof AuthenticatedSetupRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/_app/account': {
+      id: '/_authenticated/_app/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthenticatedAppAccountRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/home': {
+      id: '/_authenticated/_app/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthenticatedAppHomeRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/learn': {
+      id: '/_authenticated/_app/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof AuthenticatedAppLearnRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/notifications': {
+      id: '/_authenticated/_app/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedAppNotificationsRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/profile': {
+      id: '/_authenticated/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedAppProfileRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/tasks': {
+      id: '/_authenticated/_app/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof AuthenticatedAppTasksRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/transactions': {
+      id: '/_authenticated/_app/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof AuthenticatedAppTransactionsRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/_authenticated/_app/withdraw': {
+      id: '/_authenticated/_app/withdraw'
+      path: '/withdraw'
+      fullPath: '/withdraw'
+      preLoaderRoute: typeof AuthenticatedAppWithdrawRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
   }
 }
 
+interface AuthenticatedAppRouteRouteChildren {
+  AuthenticatedAppAccountRoute: typeof AuthenticatedAppAccountRoute
+  AuthenticatedAppHomeRoute: typeof AuthenticatedAppHomeRoute
+  AuthenticatedAppLearnRoute: typeof AuthenticatedAppLearnRoute
+  AuthenticatedAppNotificationsRoute: typeof AuthenticatedAppNotificationsRoute
+  AuthenticatedAppProfileRoute: typeof AuthenticatedAppProfileRoute
+  AuthenticatedAppTasksRoute: typeof AuthenticatedAppTasksRoute
+  AuthenticatedAppTransactionsRoute: typeof AuthenticatedAppTransactionsRoute
+  AuthenticatedAppWithdrawRoute: typeof AuthenticatedAppWithdrawRoute
+}
+
+const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
+  AuthenticatedAppAccountRoute: AuthenticatedAppAccountRoute,
+  AuthenticatedAppHomeRoute: AuthenticatedAppHomeRoute,
+  AuthenticatedAppLearnRoute: AuthenticatedAppLearnRoute,
+  AuthenticatedAppNotificationsRoute: AuthenticatedAppNotificationsRoute,
+  AuthenticatedAppProfileRoute: AuthenticatedAppProfileRoute,
+  AuthenticatedAppTasksRoute: AuthenticatedAppTasksRoute,
+  AuthenticatedAppTransactionsRoute: AuthenticatedAppTransactionsRoute,
+  AuthenticatedAppWithdrawRoute: AuthenticatedAppWithdrawRoute,
+}
+
+const AuthenticatedAppRouteRouteWithChildren =
+  AuthenticatedAppRouteRoute._addFileChildren(
+    AuthenticatedAppRouteRouteChildren,
+  )
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedSetupRoute: AuthenticatedSetupRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  CreateAccountRoute: CreateAccountRoute,
+  HelpRoute: HelpRoute,
+  PhoneSignupRoute: PhoneSignupRoute,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
