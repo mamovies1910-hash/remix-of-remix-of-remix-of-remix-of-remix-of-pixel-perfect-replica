@@ -42,7 +42,7 @@ function PlanCard({ p }: { p: Plan }) {
     setBusy(true);
     const { error } = await supabase.rpc("invest_now", { _plan_id: p.id, _amount: Number(amt) });
     setBusy(false);
-    if (error) return toast.error(errMsg(error));
+    if (error) { toast.error(errMsg(error)); return; }
     toast.success(`Invested ${money(Number(amt))} in ${p.name}`);
     setOpen(false);
     qc.invalidateQueries();
