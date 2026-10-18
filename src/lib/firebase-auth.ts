@@ -4,7 +4,6 @@ import {
   sendPasswordResetEmail, signOut, type Auth, type User,
 } from "firebase/auth";
 import { getDatabase, ref, update } from "firebase/database";
-import { createMiddleware } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { firebaseConfig } from "./firebase-config";
 import { exchangeFirebaseIdentity } from "./firebase.functions";
@@ -26,15 +25,6 @@ export async function firebaseAuth(): Promise<Auth> {
   return getAuth(await firebaseApp());
 }
 
-// Sends the Firebase ID token so the server can verify who is signing in.
-export const attachFirebaseIdentity = createMiddleware({ type: "function" }).client(async ({ next }) => {
-  if (typeof window === "undefined") return next();
-  const auth = await firebaseAuth();
-  await auth.authStateReady();
-  const user = auth.currentUser;
-  return next({ headers: user ? { "X-Firebase-Token": await user.getIdToken() } : {} });
-});
-
 // A Firebase account opens the app account only after its email is verified.
 async function openAppAccount(user: User) {
   await user.reload();
@@ -43,8 +33,8 @@ async function openAppAccount(user: User) {
     await signOut(await firebaseAuth());
     return { verified: false as const };
   }
-  await user.getIdToken(true);
-  const session = await exchangeFirebaseIdentity();
+  const token = await user.getIdToken(true);
+  const session = await exchangeFirebaseIdentity({ data: { token } });
   const { error } = await supabase.auth.setSession(session);
   if (error) throw new Error("Unable to open your account.");
   return { verified: true as const };

@@ -1,13 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequestHeader } from "@tanstack/react-start/server";
+import { z } from "zod";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { createClient } from "@supabase/supabase-js";
 import { firebaseConfig } from "./firebase-config";
 import { verifiedFirebaseIdentity } from "./identity";
 
-export const exchangeFirebaseIdentity = createServerFn({ method: "POST" }).handler(async () => {
-  const header = getRequestHeader("X-Firebase-Token");
-  if (!header) throw new Error("Sign in to continue.");
+// Verifies a Firebase ID token and returns an app session for the linked account.
+export const exchangeFirebaseIdentity = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ token: z.string().min(20).max(5000) }).parse(d))
+  .handler(async ({ data }) => {
+  const header = data.token;
   const keys = createRemoteJWKSet(new URL("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"));
   const { payload } = await jwtVerify(header, keys, {
     issuer: `https://securetoken.google.com/${firebaseConfig.projectId}`,
