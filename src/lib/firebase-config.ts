@@ -1,9 +1,10 @@
+// Public Firebase web settings. The web API key is stored as the GOOGLE_API_KEY secret
+// and handed to the browser by getFirebaseWebConfig (it is a public key by design).
 export const firebaseConfig = {
-  apiKey: "AIzaSyDA4EPDFjLs1dhVyfTGRyzXzNLqsTvcYtE",
-  authDomain: "muhyc-c936f.firebaseapp.com",
-  databaseURL: "https://muhyc-c936f-default-rtdb.firebaseio.com",
-  projectId: "muhyc-c936f",
-  storageBucket: "muhyc-c936f.firebasestorage.app",
-  messagingSenderId: "984853568071",
-  appId: "1:984853568071:android:7bb301f987f2b2d9eaaf62",
+  authDomain: "vfgtht-6bdbd.firebaseapp.com",
+  databaseURL: "https://vfgtht-6bdbd-default-rtdb.firebaseio.com",
+  projectId: "vfgtht-6bdbd",
+  storageBucket: "vfgtht-6bdbd.firebasestorage.app",
+  messagingSenderId: "882711752945",
+  appId: "1:882711752945:web:dc578a1d0cf0dfc5e07950",
 };
