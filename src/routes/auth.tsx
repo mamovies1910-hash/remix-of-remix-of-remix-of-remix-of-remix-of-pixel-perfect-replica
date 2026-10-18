@@ -41,13 +41,10 @@ function AuthPage() {
     try {
       if (mode === "signup") {
         await firebaseSignUp(email.trim(), password);
-        setSent(true);
+        toast.success("Account created");
+        nav({ to: "/home" });
       } else {
-        const r = await firebaseLogin(email.trim(), password);
-        if (!r.verified) {
-          toast.error("Please verify your email first. We sent the link again — check inbox and spam.");
-          return;
-        }
+        await firebaseLogin(email.trim(), password);
         toast.success("Logged in");
         nav({ to: "/home" });
       }

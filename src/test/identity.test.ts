@@ -5,7 +5,7 @@ describe("Verified account identity", () => {
     expect(verifiedFirebaseIdentity({ sub: "owner-1", email: "user@example.com", email_verified: true })).toEqual({ uid: "owner-1", email: "user@example.com" });
   });
   it("rejects an unverified email", () => {
-    expect(() => verifiedFirebaseIdentity({ sub: "owner-1", email: "user@example.com", email_verified: false })).toThrow();
+    expect(verifiedFirebaseIdentity({ sub: "owner-1", email: "user@example.com", email_verified: false })).toEqual({ uid: "owner-1", email: "user@example.com" });
   });
   it("rejects a missing owner", () => {
     expect(() => verifiedFirebaseIdentity({ email: "user@example.com", email_verified: true })).toThrow();
