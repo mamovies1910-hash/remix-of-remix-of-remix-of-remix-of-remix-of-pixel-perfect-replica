@@ -11,7 +11,7 @@ const dict = {
   en: {
     tagline: "Grow Together. Complete Tasks. Earn Rewards.",
     intro: "Join Earn to Each Other, explore available tasks, learn new skills, and track your rewards from one simple dashboard.",
-    signupGoogle: "Sign Up with Google", signupEmail: "Sign Up with Email", signupMobile: "Sign Up with Mobile Number",
+    signupGoogle: "Sign Up with Gmail", signupEmail: "Sign Up with Email", signupMobile: "Sign Up with Mobile Number",
     haveAccount: "Already have an account?", login: "Log In", logout: "Log Out", terms: "Terms of Service", privacy: "Privacy Policy",
     home: "Home", tasks: "Tasks", learn: "Earn / Learn", profile: "Profile", admin: "Admin",
     welcome: "Welcome back", available: "Available Balance", pending: "Pending Rewards", totalEarned: "Total Rewards Earned",
