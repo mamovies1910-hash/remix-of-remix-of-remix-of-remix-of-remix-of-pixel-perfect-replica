@@ -8,7 +8,7 @@ import promo2 from "@/assets/promo-2.mp4.asset.json";
 import { Button } from "@/components/ui/button";
 import { LangSelect, Logo } from "@/components/common";
 import { useT } from "@/lib/i18n";
-import { isDemoSignedIn } from "@/lib/demo-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { useMedia } from "@/lib/data";
 
 export const Route = createFileRoute("/")({
@@ -32,7 +32,7 @@ function Welcome() {
   const videos = adminVideos?.length ? adminVideos : [promo1, promo2];
   const [signedIn, setSignedIn] = useState(false);
   useEffect(() => {
-    setSignedIn(isDemoSignedIn());
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
   }, []);
 
 
