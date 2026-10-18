@@ -287,7 +287,7 @@ function TasksTab({ d, k, reload }: TabProps) {
   async function save() {
     if (!edit) return;
     try {
-      await adminSaveTask({ data: { key: k, task: { ...edit, action_type: edit.action_type as Task["action_type"] & ("watch" | "claim" | "visit" | "social" | "install"), description: edit.description || null, action_url: edit.action_url || null, button_label: edit.button_label || null } } });
+      await adminSaveTask({ data: { key: k, task: { ...edit, action_type: edit.action_type as "watch", description: edit.description || null, action_url: edit.action_url || null, button_label: edit.button_label || null } } });
       toast.success("Task saved"); setEdit(null); reload();
     } catch (e) { err(e); }
   }
