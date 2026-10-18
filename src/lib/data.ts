@@ -20,8 +20,6 @@ export function useUser() {
   return useQuery({
     queryKey: ["user"],
     queryFn: async () => {
-      const demo = readDemoUser();
-      if (demo) return { id: "demo-user", email: demo.email } as const;
       return (await supabase.auth.getUser()).data.user;
     },
   });
@@ -29,28 +27,7 @@ export function useUser() {
 
 export function useProfile() {
   const { userId } = useRouteContext({ from: "/_authenticated" });
-  return useQuery({
-    ...profileOptions(userId),
-    queryFn: async () => {
-      const demo = readDemoUser();
-      if (demo) {
-        return {
-          id: "demo-user",
-          full_name: demo.full_name,
-          email: demo.email,
-          phone: demo.phone,
-          avatar_url: demo.avatar_url || null,
-          country: "India",
-          preferred_language: "en",
-          profile_completed: true,
-          account_status: "active",
-        };
-      }
-      const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-  });
+  return useQuery(profileOptions(userId));
 }
 
 export function useIsAdmin() {
