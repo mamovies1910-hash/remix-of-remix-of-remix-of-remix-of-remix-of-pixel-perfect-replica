@@ -29,6 +29,7 @@ import { Route as AuthenticatedAppProfileRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppTasksRouteImport } from './routes/_authenticated/_app/tasks'
 import { Route as AuthenticatedAppTransactionsRouteImport } from './routes/_authenticated/_app/transactions'
 import { Route as AuthenticatedAppWithdrawRouteImport } from './routes/_authenticated/_app/withdraw'
+import { Route as AuthenticatedAppInvestPlanIdRouteImport } from './routes/_authenticated/_app/invest_.$planId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -131,6 +132,12 @@ const AuthenticatedAppWithdrawRoute =
     path: '/withdraw',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const AuthenticatedAppInvestPlanIdRoute =
+  AuthenticatedAppInvestPlanIdRouteImport.update({
+    id: '/invest_/$planId',
+    path: '/invest/$planId',
+    getParentRoute: () => AuthenticatedAppRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof AuthenticatedAppTasksRoute
   '/transactions': typeof AuthenticatedAppTransactionsRoute
   '/withdraw': typeof AuthenticatedAppWithdrawRoute
+  '/invest/$planId': typeof AuthenticatedAppInvestPlanIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -171,6 +179,7 @@ export interface FileRoutesByTo {
   '/tasks': typeof AuthenticatedAppTasksRoute
   '/transactions': typeof AuthenticatedAppTransactionsRoute
   '/withdraw': typeof AuthenticatedAppWithdrawRoute
+  '/invest/$planId': typeof AuthenticatedAppInvestPlanIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -194,6 +203,7 @@ export interface FileRoutesById {
   '/_authenticated/_app/tasks': typeof AuthenticatedAppTasksRoute
   '/_authenticated/_app/transactions': typeof AuthenticatedAppTransactionsRoute
   '/_authenticated/_app/withdraw': typeof AuthenticatedAppWithdrawRoute
+  '/_authenticated/_app/invest_/$planId': typeof AuthenticatedAppInvestPlanIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/transactions'
     | '/withdraw'
+    | '/invest/$planId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/transactions'
     | '/withdraw'
+    | '/invest/$planId'
   id:
     | '__root__'
     | '/'
@@ -258,6 +270,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_app/tasks'
     | '/_authenticated/_app/transactions'
     | '/_authenticated/_app/withdraw'
+    | '/_authenticated/_app/invest_/$planId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -414,6 +427,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppWithdrawRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/_app/invest_/$planId': {
+      id: '/_authenticated/_app/invest_/$planId'
+      path: '/invest/$planId'
+      fullPath: '/invest/$planId'
+      preLoaderRoute: typeof AuthenticatedAppInvestPlanIdRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
   }
 }
 
@@ -427,6 +447,7 @@ interface AuthenticatedAppRouteRouteChildren {
   AuthenticatedAppTasksRoute: typeof AuthenticatedAppTasksRoute
   AuthenticatedAppTransactionsRoute: typeof AuthenticatedAppTransactionsRoute
   AuthenticatedAppWithdrawRoute: typeof AuthenticatedAppWithdrawRoute
+  AuthenticatedAppInvestPlanIdRoute: typeof AuthenticatedAppInvestPlanIdRoute
 }
 
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
@@ -439,6 +460,7 @@ const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
   AuthenticatedAppTasksRoute: AuthenticatedAppTasksRoute,
   AuthenticatedAppTransactionsRoute: AuthenticatedAppTransactionsRoute,
   AuthenticatedAppWithdrawRoute: AuthenticatedAppWithdrawRoute,
+  AuthenticatedAppInvestPlanIdRoute: AuthenticatedAppInvestPlanIdRoute,
 }
 
 const AuthenticatedAppRouteRouteWithChildren =

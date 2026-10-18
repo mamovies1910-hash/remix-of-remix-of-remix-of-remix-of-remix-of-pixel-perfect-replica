@@ -12,6 +12,8 @@ import {
   adminAddMedia, adminAdjustBalance, adminDeleteMedia, adminDeleteTask, adminFinishVideo, adminGetData, adminLogin,
   adminGetInvest, adminSavePlan, adminSaveGift, adminSaveSettings, adminSaveTask, adminSetUserStatus, adminUpdateWithdrawal, adminUploadImage, adminVideoUploadUrl,
 } from "@/lib/admin.functions";
+import { planImage } from "@/lib/invest-images";
+import { dailyRupeesAtMax, percentFromDailyRupees } from "@/lib/invest-math";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -398,7 +400,7 @@ function GiftsTab({ d, k, reload }: TabProps) {
   );
 }
 
-type PlanForm = { id?: string; name: string; emoji: string; description: string; daily_percent: number; min_amount: number; max_amount: number; duration_days: number; is_active: boolean; sort_order: number };
+type PlanForm = { id?: string; name: string; emoji: string; description: string; image_url: string; daily_rupees: number; min_amount: number; max_amount: number; duration_days: number; is_active: boolean; sort_order: number };
 type InvestData = Awaited<ReturnType<typeof adminGetInvest>>;
 
 function InvestTab({ k }: { k: string }) {
@@ -407,19 +409,27 @@ function InvestTab({ k }: { k: string }) {
   const load = useCallback(async () => { try { setD(await adminGetInvest({ data: { key: k } })); } catch (e) { err(e); } }, [k]);
   useEffect(() => { load(); }, [load]);
   async function save(p: PlanForm) {
-    try { await adminSavePlan({ data: { key: k, plan: { ...p, description: p.description || null } } }); toast.success("Saved"); setEdit(null); load(); } catch (e) { err(e); }
+    const { daily_rupees, ...rest } = p;
+    try { await adminSavePlan({ data: { key: k, plan: { ...rest, daily_percent: percentFromDailyRupees(daily_rupees, p.max_amount), description: p.description || null, image_url: p.image_url || null } } }); toast.success("Saved"); setEdit(null); load(); } catch (e) { err(e); }
+  }
+  async function uploadPlanImage(f: File | undefined) {
+    if (!f || !edit) return;
+    try { const { url } = await adminUploadImage({ data: { key: k, base64: await readBase64(f) } }); setEdit({ ...edit, image_url: url }); toast.success("Image uploaded"); } catch (e) { err(e); }
   }
   if (!d) return <p className="text-muted-foreground">Loading…</p>;
-  const toForm = (p: InvestData["plans"][number]): PlanForm => ({ id: p.id, name: p.name, emoji: p.emoji, description: p.description ?? "", daily_percent: Number(p.daily_percent), min_amount: Number(p.min_amount), max_amount: Number(p.max_amount), duration_days: p.duration_days, is_active: p.is_active, sort_order: p.sort_order });
+  const toForm = (p: InvestData["plans"][number]): PlanForm => ({ id: p.id, name: p.name, emoji: p.emoji, description: p.description ?? "", image_url: p.image_url ?? "", daily_rupees: dailyRupeesAtMax(Number(p.daily_percent), Number(p.max_amount)), min_amount: Number(p.min_amount), max_amount: Number(p.max_amount), duration_days: p.duration_days, is_active: p.is_active, sort_order: p.sort_order });
   return (
     <div className="space-y-3">
-      <Button onClick={() => setEdit({ name: "", emoji: "💰", description: "", daily_percent: 2, min_amount: 100, max_amount: 50000, duration_days: 30, is_active: true, sort_order: d.plans.length + 1 })}><Plus className="h-4 w-4" /> New invest plan</Button>
+      <Button onClick={() => setEdit({ name: "", emoji: "💰", description: "", image_url: "", daily_rupees: 100, min_amount: 1, max_amount: 500, duration_days: 30, is_active: true, sort_order: d.plans.length + 1 })}><Plus className="h-4 w-4" /> New invest plan</Button>
       {edit && (
         <div className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2">
           <Field label="Name"><Input value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></Field>
           <Field label="Icon (emoji)"><Input value={edit.emoji} onChange={(e) => setEdit({ ...edit, emoji: e.target.value })} /></Field>
           <Field label="Description"><Input value={edit.description} onChange={(e) => setEdit({ ...edit, description: e.target.value })} /></Field>
-          <Field label="Daily profit (%)"><Input type="number" value={edit.daily_percent} onChange={(e) => setEdit({ ...edit, daily_percent: Number(e.target.value) })} /></Field>
+          <Field label="Daily profit (₹) when investing max amount"><Input type="number" value={edit.daily_rupees} onChange={(e) => setEdit({ ...edit, daily_rupees: Number(e.target.value) })} /></Field>
+          <div className="self-end rounded-lg bg-muted p-2 text-sm">Max {inr(edit.max_amount)} → {inr(edit.daily_rupees)}/day · {inr(edit.daily_rupees * 30)}/month · {inr(edit.daily_rupees * edit.duration_days)} in {edit.duration_days} days</div>
+          <Field label="Box image (link or upload)"><div className="flex gap-2"><Input value={edit.image_url} placeholder="Built-in image if empty" onChange={(e) => setEdit({ ...edit, image_url: e.target.value })} /><Input type="file" accept="image/*" className="w-40" onChange={(e) => uploadPlanImage(e.target.files?.[0])} /></div></Field>
+          <img src={planImage({ name: edit.name, image_url: edit.image_url })} alt="" className="h-24 w-full rounded-lg object-cover" />
           <Field label="Min amount (₹)"><Input type="number" value={edit.min_amount} onChange={(e) => setEdit({ ...edit, min_amount: Number(e.target.value) })} /></Field>
           <Field label="Max amount (₹)"><Input type="number" value={edit.max_amount} onChange={(e) => setEdit({ ...edit, max_amount: Number(e.target.value) })} /></Field>
           <Field label="Days"><Input type="number" value={edit.duration_days} onChange={(e) => setEdit({ ...edit, duration_days: Number(e.target.value) })} /></Field>
@@ -431,8 +441,9 @@ function InvestTab({ k }: { k: string }) {
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
         {d.plans.map((p) => (
           <div key={p.id} className={`space-y-1 rounded-xl border bg-card p-4 ${p.is_active ? "" : "opacity-50"}`}>
-            <div className="font-semibold">{p.emoji} {p.name}</div>
-            <div className="text-sm">{Number(p.daily_percent)}%/day · {p.duration_days} days</div>
+            <img src={planImage(p)} alt="" className="h-20 w-full rounded-lg object-cover" />
+            <div className="font-semibold">{p.name}</div>
+            <div className="text-sm">{inr(dailyRupeesAtMax(Number(p.daily_percent), Number(p.max_amount)))}/day on max · {p.duration_days} days</div>
             <div className="text-xs text-muted-foreground">{inr(p.min_amount)} – {inr(p.max_amount)}</div>
             <div className="flex items-center gap-2 pt-1"><Switch checked={p.is_active} onCheckedChange={(v) => save({ ...toForm(p), is_active: v })} /><Button size="sm" variant="outline" onClick={() => setEdit(toForm(p))}>Edit</Button></div>
           </div>

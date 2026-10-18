@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Bell, GraduationCap, Home, ListChecks, TrendingUp, User } from "lucide-react";
 import { LangSelect, Logo } from "@/components/common";
@@ -6,14 +6,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/lib/data";
 import { useT, type TKey } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-import { needsProfileSetup, profileOptions } from "@/lib/profile-query";
+import { profileOptions } from "@/lib/profile-query";
 
 export const Route = createFileRoute("/_authenticated/_app")({
   beforeLoad: async ({ context }) => {
-    // Demo mode: skip the profile-completed check, the demo profile is always complete.
+    // Setup is shown only right after creating an account; normal login always opens the app.
     if (context.userId === "demo-user") return { accountStatus: "active" };
     const profile = await context.queryClient.ensureQueryData(profileOptions(context.userId));
-    if (needsProfileSetup(profile)) throw redirect({ to: "/setup" });
     return { accountStatus: profile?.account_status ?? "active" };
   },
   component: AppShell,

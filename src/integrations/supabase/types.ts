@@ -94,6 +94,7 @@ export type Database = {
           duration_days: number
           emoji: string
           id: string
+          image_url: string | null
           is_active: boolean
           max_amount: number
           min_amount: number
@@ -107,6 +108,7 @@ export type Database = {
           duration_days?: number
           emoji?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
           max_amount?: number
           min_amount?: number
@@ -120,6 +122,7 @@ export type Database = {
           duration_days?: number
           emoji?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
           max_amount?: number
           min_amount?: number
