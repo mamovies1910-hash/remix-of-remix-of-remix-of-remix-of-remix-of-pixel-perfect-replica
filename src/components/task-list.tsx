@@ -100,7 +100,7 @@ export function TaskList({ limit }: { limit?: number }) {
               <div className="space-y-3 p-4">
                 <p className="line-clamp-2 text-sm text-muted-foreground">{t.description || "Watch the full ad to earn this reward."}</p>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {AD_SECONDS}s ad</span>
+                  <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {"duration_seconds" in t ? t.duration_seconds : AD_SECONDS}s</span>
                   <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> Repeats every {cd % 60 ? `${(cd / 60).toFixed(1)}h` : `${cd / 60}h`}</span>
                 </div>
                 {isDone ? (
