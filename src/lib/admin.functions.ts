@@ -37,6 +37,7 @@ export const adminGetData = createServerFn({ method: "POST" })
       db.from("media_items").select("*").order("kind").order("sort_order"),
       db.from("app_settings").select("*").eq("id", 1).maybeSingle(),
     ]);
+    const gifts = await db.from("reward_options").select("*").order("sort_order").order("amount");
     const b = new Map((bal.data ?? []).map((r) => [r.user_id, r]));
     return {
       users: (users.data ?? []).map((u) => {
@@ -49,6 +50,7 @@ export const adminGetData = createServerFn({ method: "POST" })
       tasks: tasks.data ?? [],
       media: media.data ?? [],
       settings: settings.data,
+      gifts: gifts.data ?? [],
     };
   });
 
@@ -178,5 +180,23 @@ export const adminFinishVideo = createServerFn({ method: "POST" })
     if (error || !s) throw new Error(error?.message ?? "Could not save video");
     const ins = await db.from("media_items").insert({ kind: "video", url: s.signedUrl, title: data.title, sort_order: data.sort_order });
     if (ins.error) throw new Error(ins.error.message);
+    return { ok: true };
+  });
+
+export const adminSaveGift = createServerFn({ method: "POST" })
+  .inputValidator((d) => keyed({ gift: z.object({
+    id: z.string().uuid().optional(),
+    brand: z.enum(["google_play", "amazon"]),
+    title: z.string().min(1).max(80),
+    amount: z.number().positive().max(1_000_000),
+    is_active: z.boolean(),
+    daily_limit_per_user: z.number().int().min(1).max(100).nullable(),
+    sort_order: z.number().int().min(0).max(10000),
+  }) }).parse(d))
+  .handler(async ({ data }) => {
+    const db = await admin(data.key);
+    const { id, ...g } = data.gift;
+    const { error } = id ? await db.from("reward_options").update(g).eq("id", id) : await db.from("reward_options").insert(g);
+    if (error) throw new Error(error.message);
     return { ok: true };
   });

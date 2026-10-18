@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { Film, ImageIcon, KeyRound, LogOut, Plus, Settings, Target, Trash2, Users, Wallet } from "lucide-react";
+import { Film, Gift, ImageIcon, KeyRound, LogOut, Plus, Settings, Target, Trash2, Users, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import {
   adminAddMedia, adminAdjustBalance, adminDeleteMedia, adminDeleteTask, adminFinishVideo, adminGetData, adminLogin,
-  adminSaveSettings, adminSaveTask, adminSetUserStatus, adminUpdateWithdrawal, adminUploadImage, adminVideoUploadUrl,
+  adminSaveGift, adminSaveSettings, adminSaveTask, adminSetUserStatus, adminUpdateWithdrawal, adminUploadImage, adminVideoUploadUrl,
 } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({
@@ -91,12 +91,14 @@ function Dashboard({ adminKey, onLogout }: { adminKey: string; onLogout: () => v
             <TabsList className="flex h-auto flex-wrap">
               <TabsTrigger value="users"><Users className="mr-1 h-4 w-4" />Users</TabsTrigger>
               <TabsTrigger value="payouts"><Wallet className="mr-1 h-4 w-4" />Withdrawals</TabsTrigger>
+              <TabsTrigger value="gifts"><Gift className="mr-1 h-4 w-4" />Gift cards</TabsTrigger>
               <TabsTrigger value="media"><ImageIcon className="mr-1 h-4 w-4" />Sliders & Videos</TabsTrigger>
               <TabsTrigger value="tasks"><Target className="mr-1 h-4 w-4" />Ads & Tasks</TabsTrigger>
               <TabsTrigger value="settings"><Settings className="mr-1 h-4 w-4" />Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="users"><UsersTab d={d} k={adminKey} reload={load} /></TabsContent>
             <TabsContent value="payouts"><PayoutsTab d={d} k={adminKey} reload={load} /></TabsContent>
+            <TabsContent value="gifts"><GiftsTab d={d} k={adminKey} reload={load} /></TabsContent>
             <TabsContent value="media"><MediaTab d={d} k={adminKey} reload={load} /></TabsContent>
             <TabsContent value="tasks"><TasksTab d={d} k={adminKey} reload={load} /></TabsContent>
             <TabsContent value="settings"><SettingsTab d={d} k={adminKey} reload={load} /></TabsContent>
@@ -162,7 +164,7 @@ function PayoutsTab({ d, k, reload }: TabProps) {
   const list = d.withdrawals.filter((w) => filter === "all" || w.status === "pending" || w.status === "processing");
   async function set(id: string, status: "paid" | "rejected" | "processing") {
     let reference: string | undefined;
-    if (status === "paid") { reference = window.prompt("UTR / transaction ID") ?? undefined; if (!reference) return; }
+    if (status === "paid") { const gift = d.withdrawals.find((w) => w.id === id)?.reward_option_id; reference = window.prompt(gift ? "Paste the redeem / gift code (the user will see it)" : "UTR / transaction ID") ?? undefined; if (!reference) return; }
     if (status === "rejected") { reference = window.prompt("Reason for rejecting (amount goes back to the user)") ?? undefined; if (reference === undefined) return; }
     try { await adminUpdateWithdrawal({ data: { key: k, id, status, reference } }); toast.success("Updated"); reload(); } catch (e) { err(e); }
   }
@@ -181,7 +183,7 @@ function PayoutsTab({ d, k, reload }: TabProps) {
               <div className="text-lg font-bold">{inr(w.amount)} <span className="text-xs font-normal text-muted-foreground">fee {inr(w.fee)}</span></div>
               <div className="text-sm">{u?.full_name ?? "—"} · {u?.email ?? u?.phone ?? ""}</div>
               <div className="text-sm text-muted-foreground">
-                {m ? (m.method_type === "upi" ? `UPI: ${m.upi_id}` : `Bank: ${m.bank_name} · A/C ${m.account_number} · IFSC ${m.ifsc}`) : "No payout account"} {m && `· ${m.holder_name}`}
+                {w.reward_label ? `🎁 ${w.reward_label}` : m ? (m.method_type === "upi" ? `UPI: ${m.upi_id}` : `Bank: ${m.bank_name} · A/C ${m.account_number} · IFSC ${m.ifsc}`) : "No payout account"} {m && `· ${m.holder_name}`}
               </div>
               <div className="text-xs text-muted-foreground">{fmt(w.created_at)} · <b>{w.status}</b>{w.provider_reference ? ` · ${w.provider_reference}` : ""}</div>
             </div>
@@ -345,6 +347,51 @@ function SettingsTab({ d, k, reload }: TabProps) {
       <Field label="Withdrawal fee flat (₹)"><Input type="number" value={f.fee_flat} onChange={(e) => setF({ ...f, fee_flat: Number(e.target.value) })} /></Field>
       <Field label="Notice board (shown on home page)"><Textarea value={f.announcement} onChange={(e) => setF({ ...f, announcement: e.target.value })} placeholder="e.g. Withdrawals are processed within 24 hours" /></Field>
       <Button onClick={save}>Save settings</Button>
+    </div>
+  );
+}
+
+type Gift = Data["gifts"][number];
+const blankGift = (n: number) => ({ brand: "google_play", title: "Google Play Redeem Code", amount: 1599, is_active: true, daily_limit_per_user: "" as string | number, sort_order: n });
+
+function GiftsTab({ d, k, reload }: TabProps) {
+  const [edit, setEdit] = useState<ReturnType<typeof blankGift> & { id?: string } | null>(null);
+  async function save(g: ReturnType<typeof blankGift> & { id?: string }) {
+    try {
+      await adminSaveGift({ data: { key: k, gift: { ...g, brand: g.brand as "amazon", amount: Number(g.amount), daily_limit_per_user: g.daily_limit_per_user === "" ? null : Number(g.daily_limit_per_user) } } });
+      toast.success("Saved"); setEdit(null); reload();
+    } catch (e) { err(e); }
+  }
+  const toEdit = (g: Gift) => ({ id: g.id, brand: g.brand, title: g.title, amount: Number(g.amount), is_active: g.is_active, daily_limit_per_user: g.daily_limit_per_user ?? "", sort_order: g.sort_order });
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">Boxes on the withdrawal page. When a user redeems, the request shows in Withdrawals — Approve and paste the code to send it.</p>
+      <Button onClick={() => setEdit(blankGift(d.gifts.length + 1))}><Plus className="h-4 w-4" /> New box</Button>
+      {edit && (
+        <div className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2">
+          <Field label="Type"><select className="h-10 w-full rounded-md border bg-background px-2" value={edit.brand} onChange={(e) => setEdit({ ...edit, brand: e.target.value, title: e.target.value === "amazon" ? "Amazon Gift Card" : "Google Play Redeem Code" })}><option value="google_play">Google Play redeem code</option><option value="amazon">Amazon gift card</option></select></Field>
+          <Field label="Name"><Input value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} /></Field>
+          <Field label="Price (₹)"><Input type="number" value={edit.amount} onChange={(e) => setEdit({ ...edit, amount: Number(e.target.value) })} /></Field>
+          <Field label="Limit per user per day (empty = no limit)"><Input type="number" value={edit.daily_limit_per_user} onChange={(e) => setEdit({ ...edit, daily_limit_per_user: e.target.value })} /></Field>
+          <Field label="Order (lower shows first)"><Input type="number" value={edit.sort_order} onChange={(e) => setEdit({ ...edit, sort_order: Number(e.target.value) })} /></Field>
+          <Field label="Show on withdrawal page"><Switch checked={edit.is_active} onCheckedChange={(v) => setEdit({ ...edit, is_active: v })} /></Field>
+          <div className="flex gap-2 md:col-span-2"><Button onClick={() => save(edit)} disabled={!edit.title || !edit.amount}>Save</Button><Button variant="outline" onClick={() => setEdit(null)}>Cancel</Button></div>
+        </div>
+      )}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+        {d.gifts.map((g) => (
+          <div key={g.id} className={`space-y-2 rounded-xl border bg-card p-4 ${g.is_active ? "" : "opacity-50"}`}>
+            <div className="text-xs text-muted-foreground">{g.brand === "amazon" ? "Amazon" : "Google Play"}</div>
+            <div className="font-semibold">{g.title}</div>
+            <div className="text-xl font-bold">{inr(g.amount)}</div>
+            <div className="text-xs text-muted-foreground">{g.daily_limit_per_user ? `${g.daily_limit_per_user}/day per user` : "No limit"}</div>
+            <div className="flex items-center gap-2">
+              <Switch checked={g.is_active} onCheckedChange={(v) => save({ ...toEdit(g), is_active: v })} />
+              <Button size="sm" variant="outline" onClick={() => setEdit(toEdit(g))}>Edit</Button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
