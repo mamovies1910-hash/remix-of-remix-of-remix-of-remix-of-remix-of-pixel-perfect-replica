@@ -129,6 +129,8 @@ function GiftCards({ available }: { available: number }) {
   });
   if (!options?.length) return null;
   async function redeem(id: string, title: string, amount: number) {
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) { toast.error("Please sign in with your account to redeem"); return; }
     if (!window.confirm(`Redeem ${title} for ${money(amount)}? The code will appear in History once sent.`)) return;
     setBusy(id);
     const { error } = await supabase.rpc("request_redeem", { _option_id: id });
