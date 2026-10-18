@@ -69,54 +69,6 @@ function AuthPage() {
   }
 
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="7" y="2" width="10" height="20" rx="2" /><path d="M11 18h2" />
-    </svg>
-  );
-}
-
-export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>) => ({ mode: s["mode"] === "signup" ? ("signup" as const) : ("login" as const) }),
-  head: () => ({
-    meta: [
-      { title: "Log in or sign up — Earn to Each Other" },
-      { name: "description", content: "Access your Earn to Each Other account." },
-      { property: "og:title", content: "Log in — Earn to Each Other" },
-      { property: "og:description", content: "Access your Earn to Each Other account." },
-    ],
-  }),
-  component: AuthPage,
-});
-
-function AuthPage() {
-  const { mode } = Route.useSearch();
-  const { t } = useT();
-  const nav = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [sent, setSent] = useState(false);
-
-  useEffect(() => {
-    if (isDemoSignedIn()) nav({ to: "/home" });
-  }, [nav]);
-
-  // Demo mode: no real account is created — any details go straight to Home.
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    demoSignIn({ email });
-    toast.success(mode === "signup" ? "Account created (demo)" : "Logged in (demo)");
-    nav({ to: "/home" });
-  }
-
-  function withGoogle() {
-    demoSignIn({});
-    toast.success("Signed in with Google (demo)");
-    nav({ to: "/home" });
-  }
-
-  return (
     <div className="min-h-screen bg-soft">
       <header className="mx-auto flex max-w-md items-center justify-between px-5 py-5"><Logo /><LangSelect /></header>
       <main className="mx-auto max-w-md px-5 pb-16">
