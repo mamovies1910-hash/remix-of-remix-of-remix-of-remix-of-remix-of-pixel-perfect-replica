@@ -1,0 +1,5 @@
+[{"capability":"code","source":"github","outcome":"migrate","status":"done","next_action":null},
+{"capability":"schema","source":"inferred from app code","outcome":"migrate","status":"done","next_action":null},
+{"capability":"records","source":"old backend","outcome":"migrate","status":"pending","next_action":"user to export tables as CSV"},
+{"capability":"auth","source":"google sign-in","outcome":"migrate","status":"done","next_action":"verify sign-in in preview"},
+{"capability":"firebase auth + imgbb uploads","source":"external","outcome":"preserve","status":"pending","next_action":"keys requested when ready"}]
