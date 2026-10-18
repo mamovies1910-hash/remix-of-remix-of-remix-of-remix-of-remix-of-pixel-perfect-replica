@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Bell, GraduationCap, Home, ListChecks, Shield, User } from "lucide-react";
+import { Bell, GraduationCap, Home, ListChecks, User } from "lucide-react";
 import { LangSelect, Logo } from "@/components/common";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/lib/data";

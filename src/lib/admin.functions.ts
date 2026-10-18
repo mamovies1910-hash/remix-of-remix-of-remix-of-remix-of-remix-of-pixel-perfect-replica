@@ -13,7 +13,7 @@ export const adminListUsers = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }) => {
-    const expected = process.env.ADMIN_KEY;
+    const expected = process.env["ADMIN_KEY"];
     if (!expected) return { ok: false as const, error: "Admin key not configured", users: [] };
     if (!safeEqual(data.key, expected)) return { ok: false as const, error: "Wrong admin key", users: [] };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
