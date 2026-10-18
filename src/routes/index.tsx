@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, PlayCircle, ShieldCheck, Smartphone, Wallet } from "lucide-react";
+import { ArrowRight, CheckCircle2, PlayCircle, Mail, ShieldCheck, Smartphone, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import hero from "@/assets/hero.jpg";
 import promo1 from "@/assets/promo-1.mp4.asset.json";
@@ -8,8 +8,7 @@ import promo2 from "@/assets/promo-2.mp4.asset.json";
 import { Button } from "@/components/ui/button";
 import { LangSelect, Logo } from "@/components/common";
 import { useT } from "@/lib/i18n";
-import { GoogleIcon } from "@/components/google";
-import { demoSignIn, isDemoSignedIn } from "@/lib/demo-auth";
+import { isDemoSignedIn } from "@/lib/demo-auth";
 import { useMedia } from "@/lib/data";
 
 export const Route = createFileRoute("/")({
@@ -36,11 +35,6 @@ function Welcome() {
     setSignedIn(isDemoSignedIn());
   }, []);
 
-  // Demo mode: Google button goes straight to Home, no real sign-in.
-  function withGoogle() {
-    demoSignIn({});
-    nav({ to: "/home" });
-  }
 
   return (
     <div className="min-h-screen bg-soft">
@@ -64,8 +58,8 @@ function Welcome() {
           <h1 className="mt-5 text-4xl font-extrabold leading-[1.05] md:text-6xl">{t("tagline")}</h1>
           <p className="mt-5 max-w-lg text-lg text-muted-foreground">{t("intro")}</p>
           <div className="mt-8 flex flex-col gap-3 sm:max-w-sm">
-            <Button variant="hero" size="lg" onClick={withGoogle}>
-              <GoogleIcon /> {t("signupGoogle")}
+            <Button asChild variant="hero" size="lg">
+              <Link to="/auth" search={{ mode: "signup" }}><Mail /> Sign up with Email</Link>
             </Button>
             <Button asChild variant="outline" size="lg">
               <Link to="/phone-signup"><Smartphone /> Sign up with mobile number</Link>
