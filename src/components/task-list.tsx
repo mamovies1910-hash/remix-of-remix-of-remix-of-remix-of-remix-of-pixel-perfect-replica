@@ -10,6 +10,7 @@ import { errMsg, money, useMySubmissions, useTasks } from "@/lib/data";
 import { readDemoUser } from "@/lib/demo-auth";
 import { completeDemoTask } from "@/lib/demo-tasks";
 import { cn } from "@/lib/utils";
+import { hasUnityAds, showUnityRewarded } from "@/lib/unity-bridge";
 
 const AD_SECONDS = 15;
 type Task = NonNullable<ReturnType<typeof useTasks>["data"]>[number];
@@ -76,7 +77,27 @@ export function TaskList({ limit }: { limit?: number }) {
   const list = limit ? tasks?.slice(0, limit) : tasks;
 
   // Visit / social / install tasks open their link first, then the timer runs before Claim.
-  function startTask(t: Task) {
+  const qc = useQueryClient();
+  const [adBusy, setAdBusy] = useState<string | null>(null);
+  async function startTask(t: Task) {
+    const type = "action_type" in t ? t.action_type : "watch";
+    // Inside the Android app: watch tasks play a real Unity rewarded video.
+    if (type === "watch" && hasUnityAds()) {
+      setAdBusy(t.id);
+      const r = await showUnityRewarded();
+      if (r !== "completed") {
+        setAdBusy(null);
+        toast.error(r === "skipped" ? "Watch the full ad to earn the reward" : "No ad available right now, try again shortly");
+        return;
+      }
+      const { error } = await supabase.rpc("submit_task", { _task_id: t.id, _evidence: `Unity rewarded ad completed at ${new Date().toISOString()}` });
+      setAdBusy(null);
+      if (error) { toast.error(errMsg(error)); return; }
+      toast.success(`${money(t.reward_amount)} earned!`);
+      qc.invalidateQueries({ queryKey: ["my-subs"] });
+      qc.invalidateQueries({ queryKey: ["balances"] });
+      return;
+    }
     const url = "action_url" in t ? t.action_url : null;
     if (url && /^https?:\/\//.test(url)) window.open(url, "_blank", "noopener");
     setOpen(t);
@@ -113,7 +134,7 @@ export function TaskList({ limit }: { limit?: number }) {
                     </div>
                   </div>
                 ) : (
-                  <Button variant="hero" className="w-full" onClick={() => startTask(t)}>
+                  <Button variant="hero" className="w-full" disabled={adBusy === t.id} onClick={() => startTask(t)}>
                     <PlayCircle /> {("button_label" in t && t.button_label) || "Start Task"} · Earn {money(t.reward_amount)}
                   </Button>
                 )}
