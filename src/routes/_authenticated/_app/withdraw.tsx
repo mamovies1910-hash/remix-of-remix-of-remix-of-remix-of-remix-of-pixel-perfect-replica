@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { errMsg, maskAccount, money, useBalances, useSettings } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { AmazonIcon, PlayStoreIcon } from "@/components/brand-icons";
 
 export const Route = createFileRoute("/_authenticated/_app/withdraw")({
   head: () => ({ meta: [{ title: "Withdrawal — Earn to Each Other" }, { name: "description", content: "Withdraw your earnings." }, { property: "og:title", content: "Withdrawal — Earn to Each Other" }, { property: "og:description", content: "Withdraw your earnings." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -47,6 +48,8 @@ function WithdrawPage() {
         <p className="font-display text-3xl font-bold">{money(b?.available)}</p>
       </div>
 
+      <GiftCards available={Number(b?.available ?? 0)} />
+
       <Card>
         <div className="mb-3 flex items-center justify-between"><h2 className="font-semibold">Payout account</h2><Button variant="soft" size="sm" onClick={() => setAdding((x) => !x)}>{adding ? "Cancel" : "+ Add"}</Button></div>
         {adding && <AddMethod onDone={() => { setAdding(false); qc.invalidateQueries({ queryKey: ["payout-methods"] }); }} />}
@@ -72,7 +75,7 @@ function WithdrawPage() {
         <h2 className="mb-3 font-semibold">History</h2>
         {history?.length ? history.map((w) => (
           <div key={w.id} className="flex items-center justify-between border-b py-3 last:border-0">
-            <div><p className="font-semibold">{money(w.amount, w.currency)}</p><p className="text-xs text-muted-foreground">{new Date(w.created_at).toLocaleString()}{w.provider_reference && ` · Ref ${w.provider_reference}`}</p></div>
+            <div><p className="font-semibold">{money(w.amount, w.currency)}{w.reward_label && <span className="ml-1 text-xs font-normal text-muted-foreground">· {w.reward_label}</span>}</p><p className="text-xs text-muted-foreground">{new Date(w.created_at).toLocaleString()}{w.provider_reference && (w.reward_option_id ? (w.status === "paid" ? ` · Code: ` : ` · Note: `) : ` · Ref `)}{w.provider_reference && <b className="select-all text-foreground">{w.provider_reference}</b>}</p></div>
             <StatusBadge status={w.status} />
           </div>
         )) : <p className="text-sm text-muted-foreground">No withdrawals yet.</p>}
@@ -113,5 +116,48 @@ function AddMethod({ onDone }: { onDone: () => void }) {
       )}
       <Button className="w-full" size="sm" onClick={save}>Save</Button>
     </div>
+  );
+}
+
+// Google Play / Amazon gift-card boxes, two per row. Admin sets prices, limits and adds new boxes.
+function GiftCards({ available }: { available: number }) {
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState<string | null>(null);
+  const { data: options } = useQuery({
+    queryKey: ["reward-options"],
+    queryFn: async () => (await supabase.from("reward_options").select("*").eq("is_active", true).order("sort_order").order("amount")).data ?? [],
+  });
+  if (!options?.length) return null;
+  async function redeem(id: string, title: string, amount: number) {
+    if (!window.confirm(`Redeem ${title} for ${money(amount)}? The code will appear in History once sent.`)) return;
+    setBusy(id);
+    const { error } = await supabase.rpc("request_redeem", { _option_id: id });
+    setBusy(null);
+    if (error) { toast.error(errMsg(error)); return; }
+    toast.success("Request sent — your code will appear in History");
+    ["balances", "withdrawals"].forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
+  }
+  return (
+    <Card>
+      <h2 className="mb-3 font-semibold">Redeem codes & gift cards</h2>
+      <div className="grid grid-cols-2 gap-3">
+        {options.map((o) => {
+          const amount = Number(o.amount);
+          const enough = available >= amount;
+          const play = o.brand === "google_play";
+          return (
+            <button key={o.id} disabled={!!busy} onClick={() => redeem(o.id, o.title, amount)}
+              className={cn("flex flex-col items-center gap-2 rounded-2xl border p-4 text-center transition hover:border-primary hover:shadow-card", !enough && "opacity-60")}>
+              {play ? <PlayStoreIcon className="h-12 w-12" /> : <AmazonIcon className="h-12 w-12" />}
+              <span className="text-xs font-medium text-muted-foreground">{play ? "Google Play Redeem Code" : "Amazon Gift Card"}</span>
+              <span className="font-display text-xl font-bold">{money(amount)}</span>
+              <span className={cn("rounded-full px-3 py-1 text-xs font-semibold", enough ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
+                {busy === o.id ? "Sending…" : enough ? "Redeem" : `Need ${money(amount - available)} more`}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </Card>
   );
 }
