@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { LangSelect, Logo } from "@/components/common";
 import { useT } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
-import { authError, firebaseLogin, firebaseResetPassword, firebaseSignUp } from "@/lib/firebase-auth";
+import { authError, firebaseAuth, firebaseLogin, firebaseResetPassword, firebaseSignUp } from "@/lib/firebase-auth";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({ mode: s["mode"] === "signup" ? ("signup" as const) : ("login" as const) }),
@@ -17,6 +18,8 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: "Access your Earn to Each Other account." },
       { property: "og:title", content: "Log in — Earn to Each Other" },
       { property: "og:description", content: "Access your Earn to Each Other account." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AuthPage,
@@ -26,31 +29,39 @@ function AuthPage() {
   const { mode } = Route.useSearch();
   const { t } = useT();
   const nav = useNavigate();
+  const qc = useQueryClient();
+  const submitting = useRef(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [sent, setSent] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => { if (data.session) nav({ to: "/home" }); });
+    let active = true;
+    // Prepare Firebase while the user enters their email, not after submission.
+    void firebaseAuth().catch(() => {});
+    supabase.auth.getUser().then(({ data }) => { if (active && !submitting.current && data.user) nav({ to: "/home" }); });
+    return () => { active = false; };
   }, [nav]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
     setBusy(true);
     try {
+      await qc.cancelQueries();
+      qc.clear();
       if (mode === "signup") {
         await firebaseSignUp(email.trim(), password);
-        toast.success("Account created");
-        nav({ to: "/home" });
+        await nav({ to: "/setup" });
       } else {
         await firebaseLogin(email.trim(), password);
-        toast.success("Logged in");
-        nav({ to: "/home" });
+        await nav({ to: "/home" });
       }
     } catch (err) {
       toast.error(authError(err));
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   }
@@ -67,9 +78,6 @@ function AuthPage() {
       <main className="mx-auto max-w-md px-5 pb-16">
         <div className="rounded-3xl border bg-card p-6 shadow-card">
           <h1 className="text-2xl font-bold">{mode === "signup" ? "Create your account" : t("login")}</h1>
-          {sent ? (
-            <p className="mt-4 rounded-xl bg-primary-soft p-4 text-sm text-primary">We sent a verification link to your email. Open it, then come back and log in. Check spam if you don&apos;t see it.</p>
-          ) : (
             <>
               <form onSubmit={submit} className="mt-5 space-y-4">
                 <div className="space-y-1.5"><Label htmlFor="email">{t("email")}</Label><Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
@@ -78,7 +86,6 @@ function AuthPage() {
                 {mode === "login" && <button type="button" onClick={forgot} className="w-full text-center text-sm font-semibold text-primary">Forgot password?</button>}
               </form>
             </>
-          )}
           <p className="mt-5 text-center text-sm text-muted-foreground">
             {mode === "signup" ? (
               <>{t("haveAccount")} <Link to="/auth" search={{ mode: "login" }} className="font-semibold text-primary">{t("login")}</Link></>

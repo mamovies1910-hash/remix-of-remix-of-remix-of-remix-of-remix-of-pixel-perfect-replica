@@ -5,13 +5,15 @@ import { createClient } from "@supabase/supabase-js";
 import { firebaseConfig } from "./firebase-config";
 import { verifiedFirebaseIdentity } from "./identity";
 
+// Cache only Google's public signing keys, never identities or sessions.
+const firebaseKeys = createRemoteJWKSet(new URL("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"));
+
 // Verifies a Firebase ID token and returns an app session for the linked account.
 export const exchangeFirebaseIdentity = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ token: z.string().min(20).max(5000) }).parse(d))
   .handler(async ({ data }) => {
   const header = data.token;
-  const keys = createRemoteJWKSet(new URL("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"));
-  const { payload } = await jwtVerify(header, keys, {
+  const { payload } = await jwtVerify(header, firebaseKeys, {
     issuer: `https://securetoken.google.com/${firebaseConfig.projectId}`,
     audience: firebaseConfig.projectId,
     algorithms: ["RS256"],
@@ -35,9 +37,17 @@ export const exchangeFirebaseIdentity = createServerFn({ method: "POST" })
       userId = winner.data.user_id;
     }
   }
-  const profile = await supabaseAdmin.from("profiles").upsert({ id: userId, email: identity.email }, { onConflict: "id" });
+  // Existing profiles are updated, not upserted: omitted default values must
+  // never reset profile_completed, the saved photo or details on repeat login.
+  const [profile, link] = await Promise.all([
+    supabaseAdmin.from("profiles").update({ email: identity.email }).eq("id", userId).select("id").maybeSingle(),
+    supabaseAdmin.auth.admin.generateLink({ type: "magiclink", email: internalEmail }),
+  ]);
   if (profile.error) throw new Error("Unable to save your account.");
-  const link = await supabaseAdmin.auth.admin.generateLink({ type: "magiclink", email: internalEmail });
+  if (!profile.data) {
+    const createdProfile = await supabaseAdmin.from("profiles").upsert({ id: userId, email: identity.email }, { onConflict: "id", ignoreDuplicates: true });
+    if (createdProfile.error) throw new Error("Unable to save your account.");
+  }
   if (link.error || !link.data.properties.hashed_token) throw new Error("Unable to sign in. Please retry.");
   const url = process.env['SUPABASE_URL'];
   const key = process.env['SUPABASE_PUBLISHABLE_KEY'];

@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { useRouteContext } from "@tanstack/react-router";
+import { profileOptions } from "@/lib/profile-query";
 import { supabase } from "@/integrations/supabase/client";
 import { readDemoUser } from "@/lib/demo-auth";
 import { readDemoSubs } from "@/lib/demo-tasks";
@@ -26,8 +28,9 @@ export function useUser() {
 }
 
 export function useProfile() {
+  const { userId } = useRouteContext({ from: "/_authenticated" });
   return useQuery({
-    queryKey: ["profile"],
+    ...profileOptions(userId),
     queryFn: async () => {
       const demo = readDemoUser();
       if (demo) {
@@ -43,9 +46,7 @@ export function useProfile() {
           account_status: "active",
         };
       }
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return null;
-      const { data, error } = await supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle();
+      const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
       if (error) throw error;
       return data;
     },

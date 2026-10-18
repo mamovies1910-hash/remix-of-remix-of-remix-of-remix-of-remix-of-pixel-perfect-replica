@@ -27,7 +27,7 @@ export async function firebaseAuth(): Promise<Auth> {
 
 // A Firebase account opens the app account right away (no email verification).
 async function openAppAccount(user: User) {
-  const token = await user.getIdToken(true);
+  const token = await user.getIdToken();
   const session = await exchangeFirebaseIdentity({ data: { token } });
   const { error } = await supabase.auth.setSession(session);
   if (error) throw new Error("Unable to open your account.");
@@ -37,7 +37,6 @@ async function openAppAccount(user: User) {
 export async function firebaseSignUp(email: string, password: string) {
   const auth = await firebaseAuth();
   const { user } = await createUserWithEmailAndPassword(auth, email, password);
-  await saveFirebaseProfile({ email, createdAt: Date.now() }, user);
   return openAppAccount(user);
 }
 

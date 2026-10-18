@@ -11,3 +11,4 @@
 
 - Country flags render through the `Flag` component (`src/components/flag.tsx`, flag-icons SVGs), never emoji flags — many phones show emoji flags as plain letters like "IN".
 - Login uses Firebase Authentication (email/password, no email verification — signup logs in directly); the server exchanges the Firebase ID token for an app session so balances stay protected by database rules. Why: money data must not be writable from the browser.
+- Setup and the app shell share user-scoped profile query options and the persisted completion flag; identity exchange updates existing rows without resetting defaults. Why: completed setup must survive repeat logins without redundant profile requests.

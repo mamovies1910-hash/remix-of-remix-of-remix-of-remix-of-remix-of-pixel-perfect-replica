@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { BadgeCheck, ChevronRight, CircleAlert, History, LogOut, Mail, Phone, User, Wallet } from "lucide-react";
 import { Card, StatusBadge } from "@/components/common";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/_authenticated/_app/account")({
 
 function AccountPage() {
   const nav = useNavigate();
+  const qc = useQueryClient();
   const { data: u } = useUser();
   const { data: p } = useProfile();
   const { data: b } = useBalances();
@@ -53,7 +54,7 @@ function AccountPage() {
       </div>
 
       <Card className="p-0">
-        {([["/withdraw", Wallet, "Withdrawal"], ["/transactions", History, "Transaction history"], ["/setup", User, "Edit account details"]] as const).map(([to, Icon, l]) => (
+        {([["/withdraw", Wallet, "Withdrawal"], ["/transactions", History, "Transaction history"]] as const).map(([to, Icon, l]) => (
           <Link key={to} to={to} className="flex items-center gap-3 border-b px-5 py-4 last:border-0">
             <Icon className="h-5 w-5 text-primary" /><span className="flex-1 font-medium">{l}</span><ChevronRight className="h-4 w-4 text-muted-foreground" />
           </Link>
@@ -73,7 +74,7 @@ function AccountPage() {
         </div>
       </Card>
 
-      <Button variant="outline" className="w-full" onClick={async () => { demoSignOut(); clearDemoSubs(); await firebaseSignOut().catch(() => {}); await supabase.auth.signOut(); nav({ to: "/auth", search: {} as never }); }}><LogOut /> Log out</Button>
+      <Button variant="outline" className="w-full" onClick={async () => { await qc.cancelQueries(); qc.clear(); demoSignOut(); clearDemoSubs(); await Promise.all([firebaseSignOut().catch(() => {}), supabase.auth.signOut()]); await nav({ to: "/auth", search: { mode: "login" }, replace: true }); }}><LogOut /> Log out</Button>
     </div>
   );
 }
