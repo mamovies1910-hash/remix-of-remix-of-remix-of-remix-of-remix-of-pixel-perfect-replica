@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Bell, GraduationCap, Home, ListChecks, User } from "lucide-react";
+import { Bell, GraduationCap, Home, ListChecks, TrendingUp, User } from "lucide-react";
 import { LangSelect, Logo } from "@/components/common";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/lib/data";
@@ -18,9 +18,10 @@ export const Route = createFileRoute("/_authenticated/_app")({
   component: AppShell,
 });
 
-const NAV: { to: "/home" | "/tasks" | "/account"; label: string; icon: typeof Home }[] = [
+const NAV: { to: "/home" | "/tasks" | "/invest" | "/account"; label: string; icon: typeof Home }[] = [
   { to: "/home", label: "Home", icon: Home },
   { to: "/tasks", label: "Tasks", icon: ListChecks },
+  { to: "/invest", label: "Invest", icon: TrendingUp },
   { to: "/account", label: "Account", icon: User },
 ];
 
@@ -66,7 +67,7 @@ function AppShell() {
       </div>
 
       <nav className="fixed inset-x-3 bottom-3 z-30 mb-[env(safe-area-inset-bottom)] rounded-2xl border bg-card/95 shadow-elegant backdrop-blur md:hidden">
-        <div className="grid grid-cols-3">
+        <div className="grid grid-cols-4">
           {NAV.map((n) => {
             const active = path.startsWith(n.to);
             return (

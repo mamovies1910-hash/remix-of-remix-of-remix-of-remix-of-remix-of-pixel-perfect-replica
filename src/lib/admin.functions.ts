@@ -205,6 +205,38 @@ export const adminFinishVideo = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const adminGetInvest = createServerFn({ method: "POST" })
+  .inputValidator((d) => keyed({}).parse(d))
+  .handler(async ({ data }) => {
+    const db = await admin(data.key);
+    const [plans, inv] = await Promise.all([
+      db.from("invest_plans").select("*").order("sort_order"),
+      db.from("investments").select("*").order("started_at", { ascending: false }).limit(500),
+    ]);
+    return { plans: plans.data ?? [], investments: inv.data ?? [] };
+  });
+
+export const adminSavePlan = createServerFn({ method: "POST" })
+  .inputValidator((d) => keyed({ plan: z.object({
+    id: z.string().uuid().optional(),
+    name: z.string().min(1).max(60),
+    emoji: z.string().min(1).max(8),
+    description: z.string().max(200).nullable(),
+    daily_percent: z.number().min(0).max(100),
+    min_amount: z.number().min(1).max(10_000_000),
+    max_amount: z.number().min(1).max(10_000_000),
+    duration_days: z.number().int().min(1).max(3650),
+    is_active: z.boolean(),
+    sort_order: z.number().int().min(0).max(10000),
+  }) }).parse(d))
+  .handler(async ({ data }) => {
+    const db = await admin(data.key);
+    const { id, ...p } = data.plan;
+    const { error } = id ? await db.from("invest_plans").update(p).eq("id", id) : await db.from("invest_plans").insert(p);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const adminSaveGift = createServerFn({ method: "POST" })
   .inputValidator((d) => keyed({ gift: z.object({
     id: z.string().uuid().optional(),
