@@ -19,7 +19,15 @@ export function maskAccount(s?: string | null) {
 export function useUser() {
   return useQuery({
     queryKey: ["user"],
+    queryFn: async () => {
+      return (await supabase.auth.getUser()).data.user;
+    },
   });
+}
+
+export function useProfile() {
+  const { userId } = useRouteContext({ from: "/_authenticated" });
+  return useQuery(profileOptions(userId));
 }
 
 export function useIsAdmin() {
