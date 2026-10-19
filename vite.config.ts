@@ -16,9 +16,9 @@ const FALLBACK_KEY = env["VITE_SUPABASE_PUBLISHABLE_KEY"] || "sb_publishable_W-r
 export default defineConfig({
   vite: {
     define: env["VITE_SUPABASE_URL"] ? {} : {
-      "import.meta.env["VITE_SUPABASE_URL"]": JSON.stringify(FALLBACK_URL),
-      "import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"]": JSON.stringify(FALLBACK_KEY),
-      "import.meta.env["VITE_SUPABASE_PROJECT_ID"]": JSON.stringify("jbtsqlerggltvdxckqmx"),
+      "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(FALLBACK_URL),
+      "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(FALLBACK_KEY),
+      "import.meta.env.VITE_SUPABASE_PROJECT_ID": JSON.stringify("jbtsqlerggltvdxckqmx"),
     },
   },
   tanstackStart: {
